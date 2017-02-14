@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
@@ -46,7 +48,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         }
         public void bind(int currentMovie){
             MovieForGridItem currentMovieForGridItem=moviesForGrid.get(currentMovie);
-            movieThumbnail.setImageBitmap(currentMovieForGridItem.getPosterPath());
+            String posterPath=currentMovieForGridItem.getPosterPath();
+            String basicUrl="https://image.tmdb.org/t/p";
+            String imageUrl=posterPath+basicUrl;
+            Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
         }
     }
 }
