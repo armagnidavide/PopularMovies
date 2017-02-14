@@ -17,7 +17,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private int mItemsNumber;
     public MoviesAdapter(ArrayList<MovieForGridItem> movies){
         moviesForGrid=movies;
-        mItemsNumber=moviesForGrid.size();
     }
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -38,7 +37,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public int getItemCount() {
-        return mItemsNumber;
+        return moviesForGrid.size();
     }
     class MovieViewHolder extends RecyclerView.ViewHolder{
         ImageView movieThumbnail;
@@ -50,8 +49,13 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             MovieForGridItem currentMovieForGridItem=moviesForGrid.get(currentMovie);
             String posterPath=currentMovieForGridItem.getPosterPath();
             String basicUrl="https://image.tmdb.org/t/p";
-            String imageUrl=posterPath+basicUrl;
+            String fixedSizeForPoster="/w150";
+            String imageUrl=basicUrl+fixedSizeForPoster+posterPath;
             Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
         }
+    }
+    public void setMoviesData(ArrayList<MovieForGridItem> moviesData) {
+        moviesForGrid = moviesData;
+        notifyDataSetChanged();
     }
 }
