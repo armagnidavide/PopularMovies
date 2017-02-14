@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PopularMovies</string>
+    <string name="content_description_grid_item_imageview">movie\'s poster</string>
 </resources>
