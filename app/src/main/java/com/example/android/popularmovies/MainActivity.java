@@ -1,5 +1,6 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,7 @@ import com.example.android.popularmovies.utilities.NetworkUtils;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.GridItemClickListener{
     RecyclerView mRecyclerView;
     MoviesAdapter moviesAdapter;
     ArrayList<MovieForGridItem> movieForGridItems;
@@ -25,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private final static String TOP_RATED_SEARCH="top_rated";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mRecyclerView=(RecyclerView)findViewById(R.id.recyclerView);
@@ -35,13 +36,22 @@ public class MainActivity extends AppCompatActivity {
 
         movieForGridItems=new ArrayList<>();
 
-        moviesAdapter=new MoviesAdapter(movieForGridItems);
+        moviesAdapter=new MoviesAdapter(movieForGridItems,this);
         mRecyclerView.setAdapter(moviesAdapter);
         loadMovieData(POPULAR_SEARCH);
     }
 
     private void loadMovieData(String typeOfSearch) {
         new FetchMovieTask().execute(typeOfSearch);
+    }
+
+    @Override
+    public void goToMovieDetails(int position) {
+        MovieForGridItem clickedMovie=movieForGridItems.get(position);
+        int clickedMovieId=clickedMovie.getMovieId();
+        Intent intent=new Intent(MainActivity.this,DetailsActivity.class);
+        intent.putExtra("clickedMovieId",clickedMovieId);
+        startActivity(intent);
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<MovieForGridItem>> {
@@ -75,8 +85,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<MovieForGridItem> movieForGridItems) {
-                moviesAdapter.setMoviesData(movieForGridItems);
+        protected void onPostExecute(ArrayList<MovieForGridItem> movies) {
+                movieForGridItems=movies;
+                moviesAdapter.setMoviesData(movies);
         }
     }
 

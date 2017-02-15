@@ -14,20 +14,27 @@ import java.util.ArrayList;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
     private ArrayList<MovieForGridItem> moviesForGrid;
-    private int mItemsNumber;
-    public MoviesAdapter(ArrayList<MovieForGridItem> movies){
-        moviesForGrid=movies;
+    private GridItemClickListener currentGridItemClickListener;
+
+    public MoviesAdapter(ArrayList<MovieForGridItem> movies, GridItemClickListener gridItemClickListener) {
+        moviesForGrid = movies;
+        currentGridItemClickListener = gridItemClickListener;
     }
+
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context=parent.getContext();
-        int LayoutIdForGridItem=R.layout.grid_item;
-        LayoutInflater inflater=LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately=false;
+        Context context = parent.getContext();
+        int LayoutIdForGridItem = R.layout.grid_item;
+        LayoutInflater inflater = LayoutInflater.from(context);
+        boolean shouldAttachToParentImmediately = false;
 
-        View view=inflater.inflate(LayoutIdForGridItem,parent,shouldAttachToParentImmediately);
-        MovieViewHolder movieViewHolder=new MovieViewHolder(view);
+        View view = inflater.inflate(LayoutIdForGridItem, parent, shouldAttachToParentImmediately);
+        MovieViewHolder movieViewHolder = new MovieViewHolder(view);
         return movieViewHolder;
+    }
+
+    public interface GridItemClickListener {
+        void goToMovieDetails(int position);
     }
 
     @Override
@@ -37,27 +44,43 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public int getItemCount() {
-        if(moviesForGrid!=null){
-        return moviesForGrid.size();}
-        else{return  0;}
+        if (moviesForGrid != null) {
+            return moviesForGrid.size();
+        } else {
+            return 0;
+        }
     }
-    class MovieViewHolder extends RecyclerView.ViewHolder{
+
+    class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView movieThumbnail;
+
         public MovieViewHolder(View itemView) {
             super(itemView);
-            movieThumbnail=(ImageView)itemView.findViewById(R.id.movie_thumbnail);
+            movieThumbnail = (ImageView) itemView.findViewById(R.id.movie_thumbnail);
+            itemView.setOnClickListener(this);
         }
-        public void bind(int currentMovie){
-            MovieForGridItem currentMovieForGridItem=moviesForGrid.get(currentMovie);
-            String posterPath=currentMovieForGridItem.getPosterPath();
-            String basicUrl="https://image.tmdb.org/t/p";
-            String fixedSizeForPoster="/w150";
-            String imageUrl=basicUrl+fixedSizeForPoster+posterPath;
+
+        public void bind(int currentMovie) {
+            MovieForGridItem currentMovieForGridItem = moviesForGrid.get(currentMovie);
+            String posterPath = currentMovieForGridItem.getPosterPath();
+            String basicUrl = "https://image.tmdb.org/t/p";
+            String fixedSizeForPoster = "/w150";
+            String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
             Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
         }
+
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+            currentGridItemClickListener.goToMovieDetails(position);
+
+        }
     }
+
     public void setMoviesData(ArrayList<MovieForGridItem> moviesData) {
         moviesForGrid = moviesData;
         notifyDataSetChanged();
     }
+
+
 }
