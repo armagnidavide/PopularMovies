@@ -13,10 +13,10 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
-    private ArrayList<MovieForGridItem> moviesForGrid;
+    private ArrayList<Movie> moviesForGrid;
     private GridItemClickListener currentGridItemClickListener;
 
-    public MoviesAdapter(ArrayList<MovieForGridItem> movies, GridItemClickListener gridItemClickListener) {
+    public MoviesAdapter(ArrayList<Movie> movies, GridItemClickListener gridItemClickListener) {
         moviesForGrid = movies;
         currentGridItemClickListener = gridItemClickListener;
     }
@@ -61,10 +61,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         }
 
         public void bind(int currentMovie) {
-            MovieForGridItem currentMovieForGridItem = moviesForGrid.get(currentMovie);
+            Movie currentMovieForGridItem = moviesForGrid.get(currentMovie);
             String posterPath = currentMovieForGridItem.getPosterPath();
             String basicUrl = "https://image.tmdb.org/t/p";
-            String fixedSizeForPoster = "/w150";
+            String fixedSizeForPoster = "/w185";
             String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
             Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
         }
@@ -77,7 +77,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         }
     }
 
-    public void setMoviesData(ArrayList<MovieForGridItem> moviesData) {
+    public void setMoviesData(ArrayList<Movie> moviesData) {
         moviesForGrid = moviesData;
         notifyDataSetChanged();
     }

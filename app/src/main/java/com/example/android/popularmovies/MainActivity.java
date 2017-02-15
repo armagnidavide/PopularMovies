@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.GridItemClickListener{
     RecyclerView mRecyclerView;
     MoviesAdapter moviesAdapter;
-    ArrayList<MovieForGridItem> movieForGridItems;
+    ArrayList<Movie> movieForGridItems;
     GridLayoutManager gridLayoutManager;
     private final static int NUMBER_OF_COLUMNS=4;
     private final static String POPULAR_SEARCH="popular";
@@ -47,14 +47,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     @Override
     public void goToMovieDetails(int position) {
-        MovieForGridItem clickedMovie=movieForGridItems.get(position);
+        Movie clickedMovie=movieForGridItems.get(position);
         int clickedMovieId=clickedMovie.getMovieId();
         Intent intent=new Intent(MainActivity.this,DetailsActivity.class);
         intent.putExtra("clickedMovieId",clickedMovieId);
         startActivity(intent);
     }
 
-    public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<MovieForGridItem>> {
+    public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 
         @Override
         protected void onPreExecute() {
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         }
 
         @Override
-        protected ArrayList<MovieForGridItem> doInBackground(String... params) {
+        protected ArrayList<Movie> doInBackground(String... params) {
 
             if (params.length == 0) {
                 return null;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
             try {
                 String jsonMovieResponse = NetworkUtils
                         .getResponseFromHttpUrl(movieRequestURL);
-                ArrayList<MovieForGridItem> movieForGridItems = JSONUtils
+                ArrayList<Movie> movieForGridItems = JSONUtils
                         .getBasicMoviesDataFromJson(MainActivity.this, jsonMovieResponse);
                 return movieForGridItems;
 
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         }
 
         @Override
-        protected void onPostExecute(ArrayList<MovieForGridItem> movies) {
+        protected void onPostExecute(ArrayList<Movie> movies) {
                 movieForGridItems=movies;
                 moviesAdapter.setMoviesData(movies);
         }
