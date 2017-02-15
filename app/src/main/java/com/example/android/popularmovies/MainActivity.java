@@ -1,6 +1,9 @@
 package com.example.android.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.android.popularmovies.utilities.JSONUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -24,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     private final static int NUMBER_OF_COLUMNS=4;
     private final static String POPULAR_SEARCH="popular";
     private final static String TOP_RATED_SEARCH="top_rated";
+    Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)  {
@@ -38,7 +43,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
         moviesAdapter=new MoviesAdapter(movieForGridItems,this);
         mRecyclerView.setAdapter(moviesAdapter);
-        loadMovieData(POPULAR_SEARCH);
+        if(checkNetworkConnection()){
+        loadMovieData(POPULAR_SEARCH);}
+        else{
+            showErrorMessage();
+        }
+    }
+
+    public void showErrorMessage (){
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(this, "No connection", Toast.LENGTH_SHORT);
+        mToast.show();
     }
 
     private void loadMovieData(String typeOfSearch) {
@@ -47,11 +64,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     @Override
     public void goToMovieDetails(int position) {
+        if(checkNetworkConnection()){
         Movie clickedMovie=movieForGridItems.get(position);
         int clickedMovieId=clickedMovie.getMovieId();
         Intent intent=new Intent(MainActivity.this,DetailsActivity.class);
         intent.putExtra("clickedMovieId",clickedMovieId);
-        startActivity(intent);
+        startActivity(intent);}
+        else{showErrorMessage();}
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
@@ -102,13 +121,23 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.popular_search:
-                loadMovieData(POPULAR_SEARCH);
+                if(checkNetworkConnection()){
+                loadMovieData(POPULAR_SEARCH);}
+                else{showErrorMessage();}
                 return  true;
             case R.id.top_rated__search:
-                loadMovieData(TOP_RATED_SEARCH);
+                if(checkNetworkConnection()){
+                loadMovieData(TOP_RATED_SEARCH);}
+                else{showErrorMessage();}
                 return  true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    public boolean checkNetworkConnection() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }
