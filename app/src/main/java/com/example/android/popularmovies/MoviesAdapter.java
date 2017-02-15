@@ -37,7 +37,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public int getItemCount() {
-        return moviesForGrid.size();
+        if(moviesForGrid!=null){
+        return moviesForGrid.size();}
+        else{return  0;}
     }
     class MovieViewHolder extends RecyclerView.ViewHolder{
         ImageView movieThumbnail;
