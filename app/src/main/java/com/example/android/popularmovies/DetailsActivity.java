@@ -1,9 +1,14 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,22 +25,51 @@ public class DetailsActivity extends AppCompatActivity {
     TextView releaseDate;
     TextView overview;
     int movieId;
+    Typeface courgette;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        poster=(ImageView)findViewById(R.id.details_poster);
-        title=(TextView)findViewById(R.id.details_title);
-        voteAverage=(TextView)findViewById(R.id.details_vote_average);
-        releaseDate=(TextView)findViewById(R.id.details_release_date);
-        overview=(TextView)findViewById(R.id.details_overview);
-        Intent intent=getIntent();
-        movieId=intent.getIntExtra("clickedMovieId",0);
+        setupWindowAnimations();
+        courgette = Typeface.createFromAsset(getAssets(), "Courgette-Regular.ttf");
+        poster = (ImageView) findViewById(R.id.details_poster);
+        title = (TextView) findViewById(R.id.details_title);
+        title.setTypeface(courgette);
+        voteAverage = (TextView) findViewById(R.id.details_vote_average);
+        releaseDate = (TextView) findViewById(R.id.details_release_date);
+        overview = (TextView) findViewById(R.id.details_overview);
+        Intent intent = getIntent();
+        movieId = intent.getIntExtra("clickedMovieId", 0);
         new fetchMovieDetailsTask().execute(String.valueOf(movieId));
+
+    }
+    private void setupWindowAnimations() {
+        if(Build.VERSION.SDK_INT>=21){
+            Fade fade = new Fade();
+            fade.setDuration(1000);
+            Slide slide=new Slide();
+            slide.setSlideEdge(Gravity.BOTTOM);
+            slide.setDuration(1000);
+            getWindow().setEnterTransition(slide);
+            getWindow().setReturnTransition(fade);
+
+        }
     }
 
-    class fetchMovieDetailsTask extends AsyncTask<String,Void,Movie>{
+    private void displayMovieDetails(Movie movie) {
+        String posterPath = movie.getPosterPath();
+        String basicUrl = "https://image.tmdb.org/t/p";
+        String fixedSizeForPoster = "/w342";
+        String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
+        Picasso.with(getApplicationContext()).load(imageUrl).into(poster);
+        title.setText(movie.getTitle());
+        voteAverage.setText(String.valueOf(movie.getVoteAverage()));
+        releaseDate.setText(movie.getReleaseDate());
+        overview.setText(movie.getOverview());
+    }
+
+    class fetchMovieDetailsTask extends AsyncTask<String, Void, Movie> {
         @Override
         protected Movie doInBackground(String... params) {
 
@@ -49,7 +83,7 @@ public class DetailsActivity extends AppCompatActivity {
             try {
                 String jsonMovieDetailsResponse = NetworkUtils
                         .getResponseFromHttpUrl(movieDetailsRequestURL);
-                Movie movieSelected= JSONUtils
+                Movie movieSelected = JSONUtils
                         .getMovieDetailsFromJson(DetailsActivity.this, jsonMovieDetailsResponse);
                 return movieSelected;
 
@@ -65,15 +99,5 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void displayMovieDetails(Movie movie) {
-        String posterPath = movie.getPosterPath();
-        String basicUrl = "https://image.tmdb.org/t/p";
-        String fixedSizeForPoster = "/w185";
-        String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
-        Picasso.with(getApplicationContext()).load(imageUrl).into(poster);
-        title.setText(movie.getTitle());
-        voteAverage.setText(String.valueOf(movie.getVoteAverage()));
-        releaseDate.setText(movie.getReleaseDate());
-        overview.setText(movie.getOverview());
-    }
+
 }

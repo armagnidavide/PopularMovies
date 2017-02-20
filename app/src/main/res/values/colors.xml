@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#00EAFF</color>
+    <color name="colorPrimaryDark">#046DE8</color>
+    <color name="colorAccent">#FF0000</color>
+
+    <!--color theme -->
+    <color name="colorThemeCelestial">#00EAFF</color>
+    <color name="colorThemeYellow">#E8D700</color>
+    <color name="colorThemeRed">#FF0000</color>
+    <color name="colorThemeBlue">#046DE8</color>
+    <color name="colorThemeGreen">#A4FF00</color>
+
+
+
 </resources>
