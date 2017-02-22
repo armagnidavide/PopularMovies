@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/label_layout"
         android:textColor="@android:color/black"
-        android:text="0 portrait"
+        android:text="0 land"
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

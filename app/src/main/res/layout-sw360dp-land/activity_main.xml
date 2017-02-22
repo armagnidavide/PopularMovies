@@ -9,25 +9,25 @@
     <TextView
         android:id="@+id/label_layout"
         android:textColor="@android:color/black"
-        android:text="0 portrait"
-        android:layout_alignParentTop="true"
+        android:text="360 land"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_below="@+id/label_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
     <TextView
         android:id="@+id/txtVw_main_error_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/label_layout"
+        android:layout_alignParentTop="true"
+        android:textSize="40sp"
         android:textColor="@color/colorAccent"
-        android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:text="No connection available"
-        android:visibility="invisible" />
+        android:visibility="visible" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_below="@+id/txtVw_main_error_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/btn_main_try_again"

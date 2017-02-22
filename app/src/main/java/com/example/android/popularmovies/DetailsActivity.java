@@ -1,6 +1,7 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.popularmovies.utilities.DesignUtils;
 import com.example.android.popularmovies.utilities.JSONUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -42,7 +44,6 @@ public class DetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         movieId = intent.getIntExtra("clickedMovieId", 0);
         new fetchMovieDetailsTask().execute(String.valueOf(movieId));
-
     }
     private void setupWindowAnimations() {
         if(Build.VERSION.SDK_INT>=21){
@@ -59,14 +60,28 @@ public class DetailsActivity extends AppCompatActivity {
 
     private void displayMovieDetails(Movie movie) {
         String posterPath = movie.getPosterPath();
-        String basicUrl = "https://image.tmdb.org/t/p";
-        String fixedSizeForPoster = "/w342";
-        String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
-        Picasso.with(getApplicationContext()).load(imageUrl).into(poster);
+        displayImageFromUrl(posterPath);
         title.setText(movie.getTitle());
         voteAverage.setText(String.valueOf(movie.getVoteAverage()));
         releaseDate.setText(movie.getReleaseDate());
         overview.setText(movie.getOverview());
+    }
+
+    private void displayImageFromUrl(String posterPath) {
+        String basicUrl = "https://image.tmdb.org/t/p";
+        String fixedSizeForPoster;
+        fixedSizeForPoster = calculatePosterSize();
+        String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
+        Picasso.with(getApplicationContext()).load(imageUrl).into(poster);
+    }
+
+    private String calculatePosterSize() {
+        float density=getResources().getDisplayMetrics().density;
+        Point size = new Point();
+        this.getWindowManager().getDefaultDisplay().getSize(size);
+        float width = DesignUtils.calculateScreenWidth(size, density);
+        float height = DesignUtils.calculateScreenHeight(size, density);
+        return  DesignUtils.calculatePosterSizeForDetails(density,width,height);
     }
 
     class fetchMovieDetailsTask extends AsyncTask<String, Void, Movie> {

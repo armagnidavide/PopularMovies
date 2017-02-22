@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.android.popularmovies.utilities.DesignUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
     private ArrayList<Movie> moviesForGrid;
     private GridItemClickListener currentGridItemClickListener;
+    private Context context;
 
     public MoviesAdapter(ArrayList<Movie> movies, GridItemClickListener gridItemClickListener) {
         moviesForGrid = movies;
@@ -23,7 +25,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        context = parent.getContext();
         int LayoutIdForGridItem = R.layout.grid_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
@@ -64,9 +66,15 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             Movie currentMovieForGridItem = moviesForGrid.get(currentMovie);
             String posterPath = currentMovieForGridItem.getPosterPath();
             String basicUrl = "https://image.tmdb.org/t/p";
-            String fixedSizeForPoster = "/w185";
+            String fixedSizeForPoster = calculatePosterSize();
             String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
             Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
+        }
+        private String calculatePosterSize() {
+            //According with Android device metrics I came out with this ranges for device's density
+            float density= context.getResources().getDisplayMetrics().density;
+           return DesignUtils.calculatePosterSizeForGrid(density);
+
         }
 
         @Override
