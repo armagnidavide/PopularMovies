@@ -17,6 +17,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private ArrayList<Movie> moviesForGrid;
     private GridItemClickListener currentGridItemClickListener;
     private Context context;
+    private String posterSize;
 
     public MoviesAdapter(ArrayList<Movie> movies, GridItemClickListener gridItemClickListener) {
         moviesForGrid = movies;
@@ -66,16 +67,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             Movie currentMovieForGridItem = moviesForGrid.get(currentMovie);
             String posterPath = currentMovieForGridItem.getPosterPath();
             String basicUrl = "https://image.tmdb.org/t/p";
-            String fixedSizeForPoster = calculatePosterSize();
-            String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
+            String imageUrl = basicUrl + calculatePosterSize() + posterPath;
             Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
         }
-        private String calculatePosterSize() {
-            //According with Android device metrics I came out with this ranges for device's density
-            float density= context.getResources().getDisplayMetrics().density;
-           return DesignUtils.calculatePosterSizeForGrid(density);
 
-        }
 
         @Override
         public void onClick(View view) {
@@ -83,6 +78,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             currentGridItemClickListener.goToMovieDetails(position);
 
         }
+    }
+    private String calculatePosterSize() {
+        //According with Android device metrics I came out with this ranges for device's density
+        float density= context.getResources().getDisplayMetrics().density;
+        return DesignUtils.calculatePosterSizeForGrid(density);
+
     }
 
     public void setMoviesData(ArrayList<Movie> moviesData) {

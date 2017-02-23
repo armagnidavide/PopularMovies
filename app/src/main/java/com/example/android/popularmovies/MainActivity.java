@@ -14,7 +14,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.Explode;
 import android.transition.Slide;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -105,13 +104,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         }
     }
 
+
     private int calculateNumberOfColumns() {
         float density = this.getResources().getDisplayMetrics().density;
         Point size = new Point();
         this.getWindowManager().getDefaultDisplay().getSize(size);
         float width = DesignUtils.calculateScreenWidth(size, density);
         float height = DesignUtils.calculateScreenHeight(size, density);
-        Log.e("sizes", width + " " + height);
         int orientation = DesignUtils.getScreenOrientation(width, height);
         return DesignUtils.calculateNumberOfColumns(orientation, width);
 

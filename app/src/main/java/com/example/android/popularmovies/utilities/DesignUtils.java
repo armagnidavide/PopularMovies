@@ -33,7 +33,6 @@ public class DesignUtils {
      * @return size of the movie's poster to download for DetailsActivity
      */
     public static String calculatePosterSizeForDetails(float density, float width, float height) {
-        Log.e("density", density + "");
         float minSize = Math.min(width, height);
         Log.e("minSize", minSize + "");
         if (minSize >= 750) {

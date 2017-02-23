@@ -6,8 +6,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowContentTransitions">true</item>
-
-            <!-- Exit transition from MainActivity to DetailActivity
-        <item name="android:windowExitTransition">@transition/grid_exit</item>-->
     </style>
+
+
+
 </resources>
