@@ -6,17 +6,11 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     tools:context="com.example.android.popularmovies.MainActivity">
-    <TextView
-        android:id="@+id/label_layout"
-        android:textColor="@android:color/black"
-        android:text="0 portrait"
-        android:layout_alignParentTop="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_below="@+id/label_layout"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <TextView

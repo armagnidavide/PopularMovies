@@ -45,13 +45,12 @@ public class DesignUtils {
                 //xhdpi
                 return "/w780";
             } else if (density > 1.5) {
-                //xhdpi
                 //hdpi
                 return "/w500";
             }
             //mdpi
             return "/w342";
-        } else if (density >= 2.6) {
+        } else if (density > 2.5) {
             //xxxhdpi
             //xxhdpi
             return "/w780";
