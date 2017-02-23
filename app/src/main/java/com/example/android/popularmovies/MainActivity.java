@@ -32,18 +32,22 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.GridItemClickListener {
+    //Two parameters for 2 types of searches
     private final static String POPULAR_SEARCH = "popular";
     private final static String TOP_RATED_SEARCH = "top_rated";
+    //Values for the retry button when there is a lack of connection,
+    //in this way it knows what to do if the connection comes back.
     private final static int ACTION_START_DETAILS_ACTIVITY = 0;
     private final static int ACTION_SEARCH_POPULAR = 1;
     private final static int ACTION_SEARCH_TOP_RATED = 2;
+    //Respectively RecyclerView,the adapter,the data,the LayoutManager
     private RecyclerView mRecyclerView;
     private MoviesAdapter moviesAdapter;
     private ArrayList<Movie> movieForGridItems;
     private GridLayoutManager gridLayoutManager;
     private TextView errorNoConnection;
     private ProgressBar progressBar;
-    private int clickedMovieId;
+    private int clickedMovieId;//stores the id of the movie clicked
     private Button btnTryAgain;
     private Toast mToast;
     private int action;
@@ -58,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         displayMovieGrid();
     }
 
+    /**
+     * Displays a grid of movies posters if there is connection
+     */
     private void displayMovieGrid() {
         if (checkNetworkConnection()) {
             loadMovieData(POPULAR_SEARCH);
@@ -67,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         }
     }
 
+    /**
+     * sets all listeners for this Activity
+     */
     private void setListeners() {
         btnTryAgain.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         });
     }
 
+    /**
+     * Initializes all the Activity needs
+     */
     private void initializations() {
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         gridLayoutManager = new GridLayoutManager(this, calculateNumberOfColumns());
@@ -92,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         btnTryAgain.setVisibility(View.GONE);
     }
 
+    /**
+     * Sets a slide-exit-transition and an explode-reenter-transition
+     */
     private void setupWindowAnimations() {
         if (Build.VERSION.SDK_INT >= 21) {
             Slide slide = new Slide();
@@ -103,8 +119,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
             getWindow().setReenterTransition(explode);
         }
     }
-
-
+    /**
+     * Calculate the number of columns necessary for the GridLayoutManager
+     * @return the number of columns
+     */
     private int calculateNumberOfColumns() {
         float density = this.getResources().getDisplayMetrics().density;
         Point size = new Point();
@@ -116,14 +134,20 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     }
 
-
-    public void showErrorMessage() {
+    /**
+     * Show te error message and the retry button
+     */
+    private void showErrorMessage() {
         mRecyclerView.setVisibility(View.INVISIBLE);
         errorNoConnection.setVisibility(View.VISIBLE);
         btnTryAgain.setVisibility(View.VISIBLE);
     }
 
-
+    /**
+     * Start a new FetchTask to download movies' data from themoviedb API
+     * searches for popular movies or top-rated movies
+     * @param typeOfSearch type of search to do
+     */
     private void loadMovieData(String typeOfSearch) {
         errorNoConnection.setVisibility(View.INVISIBLE);
         btnTryAgain.setVisibility(View.INVISIBLE);
@@ -132,6 +156,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         new FetchMovieTask().execute(typeOfSearch);
     }
 
+    /**
+     * Show clicked Movie's details inside DetailsActivity
+     * @param position
+     */
     @Override
     public void goToMovieDetails(int position) {
         Movie clickedMovie = movieForGridItems.get(position);
@@ -139,12 +167,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         startDetailsActivity();
     }
 
-    void startDetailsActivity() {
+    /**
+     * Create the intent to open DetailsActivity and if SDK>21
+     * transitions are used .
+     */
+    private void startDetailsActivity() {
         Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
         intent.putExtra("clickedMovieId", clickedMovieId);
         if (checkNetworkConnection()) {
             if (Build.VERSION.SDK_INT >= 21) {
-                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this)
+               Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this)
                         .toBundle();
                 startActivity(intent, bundle);
             } else {
@@ -156,6 +188,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         }
     }
 
+    /**
+     * Call one of the possibles methods in function of the action value
+     * or show a toast with an error message
+     */
     private void tryAgain() {
         if (checkNetworkConnection()) {
             if (action == ACTION_START_DETAILS_ACTIVITY) {
@@ -181,6 +217,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         return true;
     }
 
+    /**
+     * Start a search for the most-popular or the top-rated movies
+     * depending on the clicked option.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -206,20 +246,27 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     }
 
-    public boolean checkNetworkConnection() {
+    /**
+     * Check if the device is connected to a network.
+     * @return
+     */
+    private boolean checkNetworkConnection() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
+
+    private class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
         }
-
+        /**
+         *Start an AsyncTask to download movies' data in background
+         */
         @Override
         protected ArrayList<Movie> doInBackground(String... params) {
 
@@ -234,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
                 String jsonMovieResponse = NetworkUtils
                         .getResponseFromHttpUrl(movieRequestURL);
                 ArrayList<Movie> movieForGridItems = JSONUtils
-                        .getBasicMoviesDataFromJson(MainActivity.this, jsonMovieResponse);
+                        .getBasicMoviesDataFromJson(jsonMovieResponse);
                 return movieForGridItems;
 
             } catch (Exception e) {
@@ -243,6 +290,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
             }
         }
 
+        /**
+         * Hide the ProgressBar and changes the data in the adapter
+         * @param movies new movies' data
+         */
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
             progressBar.setVisibility(View.INVISIBLE);

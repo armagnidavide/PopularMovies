@@ -11,6 +11,9 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class NetworkUtils {
+    /**
+     * value for querying themoviedb API
+     */
     private static final String POPULAR_SEARCH = "popular";
     private static final String TOP_RATED_SEARCH = "top_rated";
     private static final String BASE_URL = "https://api.themoviedb.org/3";
@@ -18,6 +21,9 @@ public class NetworkUtils {
     private static final String QUERY_PARAMETER_API_KEY = "api_key";
     private static final String API_KEY = "your api-key";
 
+    /**
+     * Build and returns the Url for the search in MainActivity
+     */
     public static URL buildUrl(String typeOfSearch) {
         String searchPath;
         if (typeOfSearch == POPULAR_SEARCH) {
@@ -39,6 +45,9 @@ public class NetworkUtils {
         return url;
     }
 
+    /**
+     *Build and returns the URL for the search in DetailsActivity
+     */
     public static URL buildUrlForDetails(String movieId) {
 
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
@@ -55,6 +64,9 @@ public class NetworkUtils {
         return url;
     }
 
+    /**
+     *Return the response from an URL in String format.
+     */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
@@ -72,9 +84,5 @@ public class NetworkUtils {
         } finally {
             urlConnection.disconnect();
         }
-
-
     }
-
-
 }
