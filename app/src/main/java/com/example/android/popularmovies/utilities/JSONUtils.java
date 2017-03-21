@@ -42,13 +42,29 @@ public class JSONUtils {
     /**
      * Create a Movie object with all the details from the jsonResponse and returns it
      */
-    public static Movie getMovieDetailsFromJson(String jsonResponse) throws JSONException {
-        JSONObject movieDetails = new JSONObject(jsonResponse);
+    public static Movie getMovieDetailsFromJson(String jsonDetailsResponse,String jsonReviewsResponse) throws JSONException {
+        JSONObject movieDetails = new JSONObject(jsonDetailsResponse);
         String posterPath = movieDetails.getString(POSTER_PATH);
         String title = movieDetails.getString(TITLE);
         double vote_average = ((Number) movieDetails.get(VOTE_AVERAGE)).doubleValue();
         String releaseDate = movieDetails.getString(RELEASE_DATE);
         String overview = movieDetails.getString(OVERVIEW);
-        return new Movie(posterPath, title, vote_average, releaseDate, overview);
+        ArrayList<MovieReview> reviews=getMovieReviewsFromJson(jsonReviewsResponse);
+        return new Movie(posterPath, title, vote_average, releaseDate, overview,reviews);
+    }
+    /**
+     * Returns a String array with the movie's reviews
+     */
+    public static ArrayList<MovieReview> getMovieReviewsFromJson(String jsonResponse) throws JSONException{
+        JSONObject movieReviews=new JSONObject(jsonResponse);
+        JSONArray reviewsJson= movieReviews.getJSONArray(RESULTS);
+        ArrayList<MovieReview> reviews=new ArrayList<>();
+        for (int i = 0; i < reviewsJson.length(); i++) {
+            JSONObject singleReview=reviewsJson.getJSONObject(i);
+            reviews.add(new MovieReview(singleReview.getString("author").trim(),singleReview.getString("content").trim()));
+        }
+       //Log.e("rrr",reviews.size()+""+reviewsJson.length()+reviews.get(0)+reviews.get(1));
+
+        return reviews;
     }
 }

@@ -1,6 +1,10 @@
 package com.example.android.popularmovies;
 
 
+import com.example.android.popularmovies.utilities.MovieReview;
+
+import java.util.ArrayList;
+
 public class Movie {
     private int movieId;
     private String posterPath;
@@ -8,18 +12,21 @@ public class Movie {
     private  double voteAverage;
     private  String releaseDate;
     private  String overview;
+    private ArrayList<MovieReview> reviews;
 
     public Movie(int id, String path){
         movieId=id;
         posterPath=path;
     }
-    public Movie(String path,String title,double voteAverage,String releaseDate,String overview){
+    public Movie(String path,String title,double voteAverage,String releaseDate,String overview,ArrayList<MovieReview> reviews){
         posterPath=path;
         this.title = title;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
         this.overview = overview;
+        this.reviews=reviews;
     }
+
 
     public String getPosterPath() {
         return posterPath;
@@ -33,9 +40,6 @@ public class Movie {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public double getVoteAverage() {
         return voteAverage;
@@ -47,5 +51,9 @@ public class Movie {
 
     public String getOverview() {
         return overview;
+    }
+
+    public ArrayList<MovieReview> getReviews() {
+        return reviews;
     }
 }

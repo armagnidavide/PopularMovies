@@ -3,24 +3,31 @@ package com.example.android.popularmovies;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.transition.Fade;
 import android.transition.Slide;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.popularmovies.utilities.DesignUtils;
 import com.example.android.popularmovies.utilities.JSONUtils;
+import com.example.android.popularmovies.utilities.MovieReview;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
+import java.util.ArrayList;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>{
     private ImageView poster;
     private TextView title;
     private TextView voteAverage;
@@ -29,6 +36,10 @@ public class DetailsActivity extends AppCompatActivity {
     private int movieId;
     private Typeface courgette;//font for the movie's title
     private final static String BASIC_URL = "https://image.tmdb.org/t/p";
+    private final static int DETAIL_LOADER_ID= 101;
+    RecyclerView reviewsRecyclerView;
+    private ArrayList<MovieReview> movieReviews;
+    private MovieReviewsAdapter movieReviewsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +58,18 @@ public class DetailsActivity extends AppCompatActivity {
         voteAverage = (TextView) findViewById(R.id.details_vote_average);
         releaseDate = (TextView) findViewById(R.id.details_release_date);
         overview = (TextView) findViewById(R.id.details_overview);
+        reviewsRecyclerView=(RecyclerView)findViewById(R.id.recyclerView_reviews);
+        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
+        reviewsRecyclerView.setLayoutManager(linearLayoutManager);
+        reviewsRecyclerView.setHasFixedSize(true);
+        movieReviews=new ArrayList<>();
+        movieReviewsAdapter=new MovieReviewsAdapter(movieReviews);
+        reviewsRecyclerView.setAdapter(movieReviewsAdapter);
         Intent intent = getIntent();
         movieId = intent.getIntExtra("clickedMovieId", 0);
-        new fetchMovieDetailsTask().execute(String.valueOf(movieId));
+        //new fetchMovieDetailsTask().execute(String.valueOf(movieId));
+        getSupportLoaderManager().initLoader(DETAIL_LOADER_ID,null,this);
+
     }
 
     /**
@@ -78,6 +98,11 @@ public class DetailsActivity extends AppCompatActivity {
         voteAverage.setText(String.valueOf(movie.getVoteAverage()));
         releaseDate.setText(movie.getReleaseDate());
         overview.setText(movie.getOverview());
+        ArrayList<MovieReview> reviews=movie.getReviews();
+        Log.e("0000000",""+reviews.size());
+        movieReviews=reviews;
+        movieReviewsAdapter.setMoviesData(reviews);
+
     }
 
     /**
@@ -103,11 +128,55 @@ public class DetailsActivity extends AppCompatActivity {
         return DesignUtils.calculatePosterSizeForDetails(density, width, height);
     }
 
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader(this) {
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                forceLoad();
+            }
 
-    private class fetchMovieDetailsTask extends AsyncTask<String, Void, Movie> {
-        /**
-         * request te movie's details to display
-         */
+            @Override
+            public Movie loadInBackground() {
+
+
+                URL movieDetailsRequestURL = NetworkUtils.buildUrlForDetails(String.valueOf(movieId));
+                URL movieReviewsUrl=NetworkUtils.buildUrlForReviews(String.valueOf(movieId));
+
+
+                try {
+                    String jsonMovieDetailsResponse = NetworkUtils
+                            .getResponseFromHttpUrl(movieDetailsRequestURL);
+                    String reviews=NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
+                    Movie movieSelected = JSONUtils
+                            .getMovieDetailsFromJson(jsonMovieDetailsResponse,reviews);
+
+                    return movieSelected;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Movie data) {
+        displayMovieDetails(data);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+
+    }
+
+
+   /* private class fetchMovieDetailsTask extends AsyncTask<String, Void, Movie> {
+
+         //request te movie's details to display
+
         @Override
         protected Movie doInBackground(String... params) {
 
@@ -136,6 +205,6 @@ public class DetailsActivity extends AppCompatActivity {
             displayMovieDetails(movie);
         }
     }
-
+*/
 
 }

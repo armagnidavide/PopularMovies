@@ -19,8 +19,8 @@ public class NetworkUtils {
     private static final String BASE_URL = "https://api.themoviedb.org/3";
     private static final String BASE_PATH = "movie";
     private static final String QUERY_PARAMETER_API_KEY = "api_key";
-    private static final String API_KEY = "your api-key";
-
+    private static final String REVIEWS_PATH = "reviews";
+    private static final String API_KEY = "your-api-key";
     /**
      * Build and returns the Url for the search in MainActivity
      */
@@ -53,6 +53,25 @@ public class NetworkUtils {
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(BASE_PATH)
                 .appendPath(movieId)
+                .appendQueryParameter(QUERY_PARAMETER_API_KEY, API_KEY)
+                .build();
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+    /**
+     *Build and returns the URL to requests reviews for a specific movie in DetailsActivity
+     */
+    public static URL buildUrlForReviews(String movieId) {
+
+        Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                .appendPath(BASE_PATH)
+                .appendPath(movieId)
+                .appendPath(REVIEWS_PATH)
                 .appendQueryParameter(QUERY_PARAMETER_API_KEY, API_KEY)
                 .build();
         URL url = null;
