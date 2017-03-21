@@ -87,6 +87,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_play_trailer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Play Trailer"
+                android:layout_margin="16dp"/>
+            <Button
+                android:id="@+id/btn_add_as_favourites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="mark as favourite"
+                android:background="@drawable/favourites_selector"
+                android:layout_margin="16dp"/>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/details_overview"
@@ -94,7 +112,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp" />
+            <TextView
+                android:layout_margin="16dp"
+                android:text="Reviews:"
+                android:layout_gravity="left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
+
+
     </ScrollView>
 
 </LinearLayout>
