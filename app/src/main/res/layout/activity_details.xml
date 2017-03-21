@@ -92,12 +92,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
             <Button
-                android:id="@+id/btn_play_trailer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Play Trailer"
-                android:layout_margin="16dp"/>
-            <Button
                 android:id="@+id/btn_add_as_favourites"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -118,6 +112,10 @@
                 android:layout_gravity="left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView_videos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerView_reviews"
                 android:layout_width="match_parent"

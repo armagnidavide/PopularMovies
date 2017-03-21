@@ -42,7 +42,7 @@ public class JSONUtils {
     /**
      * Create a Movie object with all the details from the jsonResponse and returns it
      */
-    public static Movie getMovieDetailsFromJson(String jsonDetailsResponse,String jsonReviewsResponse) throws JSONException {
+    public static Movie getMovieDetailsFromJson(String jsonDetailsResponse,String jsonReviewsResponse,String jsonVideoResponse) throws JSONException {
         JSONObject movieDetails = new JSONObject(jsonDetailsResponse);
         String posterPath = movieDetails.getString(POSTER_PATH);
         String title = movieDetails.getString(TITLE);
@@ -50,7 +50,8 @@ public class JSONUtils {
         String releaseDate = movieDetails.getString(RELEASE_DATE);
         String overview = movieDetails.getString(OVERVIEW);
         ArrayList<MovieReview> reviews=getMovieReviewsFromJson(jsonReviewsResponse);
-        return new Movie(posterPath, title, vote_average, releaseDate, overview,reviews);
+        ArrayList<String> videos=getMovieVideosFromJson(jsonVideoResponse);
+        return new Movie(posterPath, title, vote_average, releaseDate, overview,reviews,videos);
     }
     /**
      * Returns a String array with the movie's reviews
@@ -63,8 +64,17 @@ public class JSONUtils {
             JSONObject singleReview=reviewsJson.getJSONObject(i);
             reviews.add(new MovieReview(singleReview.getString("author").trim(),singleReview.getString("content").trim()));
         }
-       //Log.e("rrr",reviews.size()+""+reviewsJson.length()+reviews.get(0)+reviews.get(1));
-
         return reviews;
+    }
+
+    public static ArrayList<String> getMovieVideosFromJson(String jsonResponse)throws JSONException{
+        JSONObject movieVideos=new JSONObject(jsonResponse);
+        JSONArray videosJson= movieVideos.getJSONArray(RESULTS);
+        ArrayList<String> videos=new ArrayList<>();
+        for (int i = 0; i < videosJson.length(); i++) {
+            JSONObject singleVideo=videosJson.getJSONObject(i);
+            videos.add(singleVideo.getString("key"));
+        }
+        return videos;
     }
 }

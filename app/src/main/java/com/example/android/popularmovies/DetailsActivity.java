@@ -3,6 +3,7 @@ package com.example.android.popularmovies;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -27,7 +28,7 @@ import com.squareup.picasso.Picasso;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>{
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>,MovieVideosAdapter.goToYoutubeClickListener{
     private ImageView poster;
     private TextView title;
     private TextView voteAverage;
@@ -40,6 +41,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     RecyclerView reviewsRecyclerView;
     private ArrayList<MovieReview> movieReviews;
     private MovieReviewsAdapter movieReviewsAdapter;
+    RecyclerView videosRecyclerView;
+    private ArrayList<String> videosIds;
+    private MovieVideosAdapter movieVideosAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +69,15 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         movieReviews=new ArrayList<>();
         movieReviewsAdapter=new MovieReviewsAdapter(movieReviews);
         reviewsRecyclerView.setAdapter(movieReviewsAdapter);
+
+        videosRecyclerView=(RecyclerView)findViewById(R.id.recyclerView_videos);
+        LinearLayoutManager linearLayoutManager2=new LinearLayoutManager(this);
+        videosRecyclerView.setLayoutManager(linearLayoutManager2);
+        videosRecyclerView.setHasFixedSize(true);
+        videosIds=new ArrayList<>();
+        movieVideosAdapter=new MovieVideosAdapter(videosIds,this);
+        videosRecyclerView.setAdapter(movieVideosAdapter);
+
         Intent intent = getIntent();
         movieId = intent.getIntExtra("clickedMovieId", 0);
         //new fetchMovieDetailsTask().execute(String.valueOf(movieId));
@@ -98,10 +111,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         voteAverage.setText(String.valueOf(movie.getVoteAverage()));
         releaseDate.setText(movie.getReleaseDate());
         overview.setText(movie.getOverview());
-        ArrayList<MovieReview> reviews=movie.getReviews();
-        Log.e("0000000",""+reviews.size());
-        movieReviews=reviews;
-        movieReviewsAdapter.setMoviesData(reviews);
+        movieReviews=movie.getReviews();
+        videosIds=movie.getVideosIds();
+        movieReviewsAdapter.setMoviesData(movieReviews);
+        movieVideosAdapter.setMovieData(videosIds);
 
     }
 
@@ -143,15 +156,16 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
                 URL movieDetailsRequestURL = NetworkUtils.buildUrlForDetails(String.valueOf(movieId));
                 URL movieReviewsUrl=NetworkUtils.buildUrlForReviews(String.valueOf(movieId));
+                URL movieVideosUrl=NetworkUtils.buildUrlForVideos(String.valueOf(movieId));
 
 
                 try {
                     String jsonMovieDetailsResponse = NetworkUtils
                             .getResponseFromHttpUrl(movieDetailsRequestURL);
                     String reviews=NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
+                    String videos=NetworkUtils.getResponseFromHttpUrl(movieVideosUrl);
                     Movie movieSelected = JSONUtils
-                            .getMovieDetailsFromJson(jsonMovieDetailsResponse,reviews);
-
+                            .getMovieDetailsFromJson(jsonMovieDetailsResponse,reviews,videos);
                     return movieSelected;
 
                 } catch (Exception e) {
@@ -171,6 +185,17 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public void onLoaderReset(Loader loader) {
 
     }
+
+    @Override
+    public void goToYoutube(String videoId) {
+        URL url = NetworkUtils.buildUrlForYoutube(videoId);
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url.toString()));
+        Log.e("intent","aaaaaaaaaa");
+        startActivity(i);
+    }
+
+
 
 
    /* private class fetchMovieDetailsTask extends AsyncTask<String, Void, Movie> {

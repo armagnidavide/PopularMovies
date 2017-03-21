@@ -13,18 +13,20 @@ public class Movie {
     private  String releaseDate;
     private  String overview;
     private ArrayList<MovieReview> reviews;
+    private ArrayList<String> videosIds;
 
     public Movie(int id, String path){
         movieId=id;
         posterPath=path;
     }
-    public Movie(String path,String title,double voteAverage,String releaseDate,String overview,ArrayList<MovieReview> reviews){
+    public Movie(String path,String title,double voteAverage,String releaseDate,String overview,ArrayList<MovieReview> reviews,ArrayList<String> videosIds){
         posterPath=path;
         this.title = title;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
         this.overview = overview;
         this.reviews=reviews;
+        this.videosIds = videosIds;
     }
 
 
@@ -55,5 +57,9 @@ public class Movie {
 
     public ArrayList<MovieReview> getReviews() {
         return reviews;
+    }
+
+    public ArrayList<String> getVideosIds() {
+        return videosIds;
     }
 }
