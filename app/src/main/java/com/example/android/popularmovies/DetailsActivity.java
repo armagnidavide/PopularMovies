@@ -21,14 +21,13 @@ import android.widget.TextView;
 
 import com.example.android.popularmovies.utilities.DesignUtils;
 import com.example.android.popularmovies.utilities.JSONUtils;
-import com.example.android.popularmovies.utilities.MovieReview;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
 import java.util.ArrayList;
 
-public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>,MovieVideosAdapter.goToYoutubeClickListener{
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>, MovieVideosAdapter.goToYoutubeClickListener {
     private ImageView poster;
     private TextView title;
     private TextView voteAverage;
@@ -37,7 +36,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private int movieId;
     private Typeface courgette;//font for the movie's title
     private final static String BASIC_URL = "https://image.tmdb.org/t/p";
-    private final static int DETAIL_LOADER_ID= 101;
+    private final static int DETAIL_LOADER_ID = 101;
     RecyclerView reviewsRecyclerView;
     private ArrayList<MovieReview> movieReviews;
     private MovieReviewsAdapter movieReviewsAdapter;
@@ -62,26 +61,26 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         voteAverage = (TextView) findViewById(R.id.details_vote_average);
         releaseDate = (TextView) findViewById(R.id.details_release_date);
         overview = (TextView) findViewById(R.id.details_overview);
-        reviewsRecyclerView=(RecyclerView)findViewById(R.id.recyclerView_reviews);
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
+        reviewsRecyclerView = (RecyclerView) findViewById(R.id.recyclerView_reviews);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         reviewsRecyclerView.setLayoutManager(linearLayoutManager);
         reviewsRecyclerView.setHasFixedSize(true);
-        movieReviews=new ArrayList<>();
-        movieReviewsAdapter=new MovieReviewsAdapter(movieReviews);
+        movieReviews = new ArrayList<>();
+        movieReviewsAdapter = new MovieReviewsAdapter(movieReviews);
         reviewsRecyclerView.setAdapter(movieReviewsAdapter);
 
-        videosRecyclerView=(RecyclerView)findViewById(R.id.recyclerView_videos);
-        LinearLayoutManager linearLayoutManager2=new LinearLayoutManager(this);
+        videosRecyclerView = (RecyclerView) findViewById(R.id.recyclerView_videos);
+        LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(this);
         videosRecyclerView.setLayoutManager(linearLayoutManager2);
         videosRecyclerView.setHasFixedSize(true);
-        videosIds=new ArrayList<>();
-        movieVideosAdapter=new MovieVideosAdapter(videosIds,this);
+        videosIds = new ArrayList<>();
+        movieVideosAdapter = new MovieVideosAdapter(videosIds, this);
         videosRecyclerView.setAdapter(movieVideosAdapter);
 
         Intent intent = getIntent();
         movieId = intent.getIntExtra("clickedMovieId", 0);
         //new fetchMovieDetailsTask().execute(String.valueOf(movieId));
-        getSupportLoaderManager().initLoader(DETAIL_LOADER_ID,null,this);
+        getSupportLoaderManager().initLoader(DETAIL_LOADER_ID, null, this);
 
     }
 
@@ -111,8 +110,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         voteAverage.setText(String.valueOf(movie.getVoteAverage()));
         releaseDate.setText(movie.getReleaseDate());
         overview.setText(movie.getOverview());
-        movieReviews=movie.getReviews();
-        videosIds=movie.getVideosIds();
+        movieReviews = movie.getReviews();
+        videosIds = movie.getVideosIds();
         movieReviewsAdapter.setMoviesData(movieReviews);
         movieVideosAdapter.setMovieData(videosIds);
 
@@ -155,23 +154,24 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
 
                 URL movieDetailsRequestURL = NetworkUtils.buildUrlForDetails(String.valueOf(movieId));
-                URL movieReviewsUrl=NetworkUtils.buildUrlForReviews(String.valueOf(movieId));
-                URL movieVideosUrl=NetworkUtils.buildUrlForVideos(String.valueOf(movieId));
+                URL movieReviewsUrl = NetworkUtils.buildUrlForReviews(String.valueOf(movieId));
+                URL movieVideosUrl = NetworkUtils.buildUrlForVideos(String.valueOf(movieId));
 
 
                 try {
                     String jsonMovieDetailsResponse = NetworkUtils
                             .getResponseFromHttpUrl(movieDetailsRequestURL);
-                    String reviews=NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
-                    String videos=NetworkUtils.getResponseFromHttpUrl(movieVideosUrl);
+                    String reviews = NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
+                    String videos = NetworkUtils.getResponseFromHttpUrl(movieVideosUrl);
                     Movie movieSelected = JSONUtils
-                            .getMovieDetailsFromJson(jsonMovieDetailsResponse,reviews,videos);
+                            .getMovieDetailsFromJson(jsonMovieDetailsResponse, reviews, videos);
                     return movieSelected;
 
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
-                }            }
+                }
+            }
         };
     }
 
@@ -191,7 +191,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         URL url = NetworkUtils.buildUrlForYoutube(videoId);
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url.toString()));
-        Log.e("intent","aaaaaaaaaa");
+        Log.e("intent", "aaaaaaaaaa");
         startActivity(i);
     }
 

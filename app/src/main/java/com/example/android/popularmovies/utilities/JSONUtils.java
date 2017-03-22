@@ -2,6 +2,7 @@ package com.example.android.popularmovies.utilities;
 
 
 import com.example.android.popularmovies.Movie;
+import com.example.android.popularmovies.MovieReview;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,37 +43,40 @@ public class JSONUtils {
     /**
      * Create a Movie object with all the details from the jsonResponse and returns it
      */
-    public static Movie getMovieDetailsFromJson(String jsonDetailsResponse,String jsonReviewsResponse,String jsonVideoResponse) throws JSONException {
+    public static Movie getMovieDetailsFromJson(String jsonDetailsResponse, String jsonReviewsResponse, String jsonVideoResponse) throws JSONException {
         JSONObject movieDetails = new JSONObject(jsonDetailsResponse);
         String posterPath = movieDetails.getString(POSTER_PATH);
         String title = movieDetails.getString(TITLE);
         double vote_average = ((Number) movieDetails.get(VOTE_AVERAGE)).doubleValue();
         String releaseDate = movieDetails.getString(RELEASE_DATE);
         String overview = movieDetails.getString(OVERVIEW);
-        ArrayList<MovieReview> reviews=getMovieReviewsFromJson(jsonReviewsResponse);
-        ArrayList<String> videos=getMovieVideosFromJson(jsonVideoResponse);
-        return new Movie(posterPath, title, vote_average, releaseDate, overview,reviews,videos);
+        ArrayList<MovieReview> reviews = getMovieReviewsFromJson(jsonReviewsResponse);
+        ArrayList<String> videos = getMovieVideosFromJson(jsonVideoResponse);
+        return new Movie(posterPath, title, vote_average, releaseDate, overview, reviews, videos);
     }
+
     /**
-     * Returns a String array with the movie's reviews
+     * Returns an ArrayList of Strings with the movie's reviews
      */
-    public static ArrayList<MovieReview> getMovieReviewsFromJson(String jsonResponse) throws JSONException{
-        JSONObject movieReviews=new JSONObject(jsonResponse);
-        JSONArray reviewsJson= movieReviews.getJSONArray(RESULTS);
-        ArrayList<MovieReview> reviews=new ArrayList<>();
+    public static ArrayList<MovieReview> getMovieReviewsFromJson(String jsonResponse) throws JSONException {
+        JSONObject movieReviews = new JSONObject(jsonResponse);
+        JSONArray reviewsJson = movieReviews.getJSONArray(RESULTS);
+        ArrayList<MovieReview> reviews = new ArrayList<>();
         for (int i = 0; i < reviewsJson.length(); i++) {
-            JSONObject singleReview=reviewsJson.getJSONObject(i);
-            reviews.add(new MovieReview(singleReview.getString("author").trim(),singleReview.getString("content").trim()));
+            JSONObject singleReview = reviewsJson.getJSONObject(i);
+            reviews.add(new MovieReview(singleReview.getString("author").trim(), singleReview.getString("content").trim()));
         }
         return reviews;
     }
-
-    public static ArrayList<String> getMovieVideosFromJson(String jsonResponse)throws JSONException{
-        JSONObject movieVideos=new JSONObject(jsonResponse);
-        JSONArray videosJson= movieVideos.getJSONArray(RESULTS);
-        ArrayList<String> videos=new ArrayList<>();
+    /**
+     * Returns an ArrayList of Strings with the movie's videos' keys.
+     */
+    public static ArrayList<String> getMovieVideosFromJson(String jsonResponse) throws JSONException {
+        JSONObject movieVideos = new JSONObject(jsonResponse);
+        JSONArray videosJson = movieVideos.getJSONArray(RESULTS);
+        ArrayList<String> videos = new ArrayList<>();
         for (int i = 0; i < videosJson.length(); i++) {
-            JSONObject singleVideo=videosJson.getJSONObject(i);
+            JSONObject singleVideo = videosJson.getJSONObject(i);
             videos.add(singleVideo.getString("key"));
         }
         return videos;

@@ -26,6 +26,7 @@ public class NetworkUtils {
     private static final String REVIEWS_PATH = "reviews";
     private static final String VIDEOS_PATH = "videos";
     private static final String API_KEY = "your-api-key";
+
     /**
      * Build and returns the Url for the search in MainActivity
      */
@@ -51,7 +52,7 @@ public class NetworkUtils {
     }
 
     /**
-     *Build and returns the URL for the search in DetailsActivity
+     * Build and returns the URL for the search in DetailsActivity
      */
     public static URL buildUrlForDetails(String movieId) {
 
@@ -68,8 +69,9 @@ public class NetworkUtils {
         }
         return url;
     }
+
     /**
-     *Build and returns the URL to requests reviews for a specific movie in DetailsActivity
+     * Build and returns the URL to requests reviews for a specific movie in DetailsActivity
      */
     public static URL buildUrlForReviews(String movieId) {
 
@@ -87,8 +89,9 @@ public class NetworkUtils {
         }
         return url;
     }
+
     /**
-     *Build and returns the URL to requests videos' ids for a specific movie in DetailsActivity
+     * Build and returns the URL to requests videos' ids for a specific movie in DetailsActivity
      */
     public static URL buildUrlForVideos(String movieId) {
 
@@ -97,7 +100,7 @@ public class NetworkUtils {
                 .appendPath(movieId)
                 .appendPath(VIDEOS_PATH)
                 .appendQueryParameter(QUERY_PARAMETER_API_KEY, API_KEY)
-                .appendQueryParameter(QUERY_PARAMETER_LANGUAGE,ENGLISH)
+                .appendQueryParameter(QUERY_PARAMETER_LANGUAGE, ENGLISH)
                 .build();
         URL url = null;
         try {
@@ -107,8 +110,9 @@ public class NetworkUtils {
         }
         return url;
     }
+
     /**
-     *Build and returns the URL to requests videos' ids for a specific movie in DetailsActivity
+     * Build and returns the URL for a Youtube Video
      */
     public static URL buildUrlForYoutube(String videoKey) {
 
@@ -125,7 +129,7 @@ public class NetworkUtils {
     }
 
     /**
-     *Return the response from an URL in String format.
+     * Return the response from an URL in String format.
      */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

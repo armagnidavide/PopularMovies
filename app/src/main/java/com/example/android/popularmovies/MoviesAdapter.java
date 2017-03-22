@@ -27,7 +27,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     /**
-     *create a View with the item-layout then pass it to the movieViewHolder constructor and return a movieViewHolder
+     * create a View with the item-layout then pass it to the movieViewHolder constructor and return a movieViewHolder
      */
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -40,12 +40,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         return movieViewHolder;
     }
 
-    /**
-     * implement this interface to override the onclick method for the movieAdapter
-     */
-    public interface GridItemClickListener {
-        void goToMovieDetails(int position);
-    }
     /**
      * Bind Data to View objects
      */
@@ -67,6 +61,30 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     /**
+     * return the movie's poster size to download the movie's poster image
+     */
+    private String calculatePosterSize() {
+        float density = context.getResources().getDisplayMetrics().density;
+        return DesignUtils.calculatePosterSizeForGrid(density);
+    }
+
+    /**
+     * notify that the data is changed
+     * LayoutManagers will be forced to fully rebind and relayout all visible views
+     */
+    public void setMoviesData(ArrayList<Movie> moviesData) {
+        moviesForGrid = moviesData;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * implement this interface to override the onclick method for the movieAdapter
+     */
+    public interface GridItemClickListener {
+        void goToMovieDetails(int position);
+    }
+
+    /**
      * the ViewHolder contains a reference to the root view object for the item,and we use it
      * to cache the view objects represented in the layout to make it less costly to update the views with new data.
      * In this way findViewById is called just when a new item is created and not every time the views in an item are populated with data.
@@ -74,6 +92,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
      */
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView movieThumbnail;
+
         /**
          * MovieViewHolder's constructor.
          * Initialize the View objects,
@@ -92,28 +111,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             String imageUrl = basicUrl + calculatePosterSize() + posterPath;
             Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
         }
+
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
             currentGridItemClickListener.goToMovieDetails(position);
         }
-    }
-
-    /**
-     * return the movie's poster size to download the movie's poster image
-     */
-    private String calculatePosterSize() {
-        float density = context.getResources().getDisplayMetrics().density;
-        return DesignUtils.calculatePosterSizeForGrid(density);
-    }
-
-    /**
-     * notify that the data is changed
-     * LayoutManagers will be forced to fully rebind and relayout all visible views
-     */
-    public void setMoviesData(ArrayList<Movie> moviesData) {
-        moviesForGrid = moviesData;
-        notifyDataSetChanged();
     }
 
 
