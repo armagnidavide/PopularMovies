@@ -1,7 +1,9 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +21,6 @@ public class MovieReviewsAdapter extends RecyclerView.Adapter<MovieReviewsAdapte
     private TextView txtVwReviewContent;
 
     /**
-     *
      * @param reviews Arraylist containing MovieReview instances, that are used to bind data to MovieReviewViewHolders
      */
     public MovieReviewsAdapter(ArrayList<MovieReview> reviews) {
@@ -41,8 +42,13 @@ public class MovieReviewsAdapter extends RecyclerView.Adapter<MovieReviewsAdapte
     @Override
     public void onBindViewHolder(MovieReviewViewHolder holder, int position) {
         MovieReview currentMovieReview = reviews.get(position);
+        txtVwReviewAuthor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+        txtVwReviewAuthor.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        txtVwReviewAuthor.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
         txtVwReviewAuthor.setText(currentMovieReview.getAuthor());
+        txtVwReviewContent.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         txtVwReviewContent.setText(currentMovieReview.getContent());
+
     }
 
     @Override

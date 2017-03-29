@@ -1,12 +1,9 @@
 package com.example.android.popularmovies;
 
 import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Point;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -45,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     private final static int ACTION_START_DETAILS_ACTIVITY = 1;
     private final static int ACTION_SEARCH_POPULAR = 2;
     private final static int ACTION_SEARCH_TOP_RATED = 3;
-    private final static int ACTION_SEARCH_FAVOURITES=4;
+    private final static int ACTION_SEARCH_FAVOURITES = 4;
     //Respectively RecyclerView,the adapter,the data,the LayoutManager
     private RecyclerView mRecyclerView;
     private MoviesAdapter moviesAdapter;
@@ -63,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     private LoaderManager.LoaderCallbacks<Cursor> favourites_loader;
     private LoaderManager.LoaderCallbacks<ArrayList<Movie>> favourites_thumbnails_loader;
+    private TextView txtVwAddFavouritesmessage;
 
 
     @Override
@@ -79,14 +77,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     private void checkPreviousState(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            action=savedInstanceState.getInt("action");
+            action = savedInstanceState.getInt("action");
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("action",action);
+        outState.putInt("action", action);
 
     }
 
@@ -176,7 +174,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
                     bundle.putIntArray("movieIds", movieIds);
                     getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_THUMBNAILS, bundle, favourites_thumbnails_loader);
                 } else {
-                    Toast.makeText(getApplicationContext(), "COUNT =0", Toast.LENGTH_SHORT).show();
+                    mRecyclerView.setVisibility(View.INVISIBLE);
+                    errorNoConnection.setVisibility(View.INVISIBLE);
+                    btnTryAgain.setVisibility(View.INVISIBLE);
+                    txtVwAddFavouritesmessage.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -194,8 +195,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
      * Displays a grid of movies posters if there is connection
      */
     private void displayMovieGrid() {
-        if (checkNetworkConnection()) {
-            switch (action){
+        if (NetworkUtils.checkNetworkConnection(this)) {
+            switch (action) {
                 case ACTION_SEARCH_POPULAR:
                     loadMovieData(POPULAR_SEARCH);
                     break;
@@ -203,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
                     loadMovieData(TOP_RATED_SEARCH);
                     break;
                 case ACTION_SEARCH_FAVOURITES:
-                    getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS,null,favourites_loader);
+                    getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS, null, favourites_loader);
                     break;
             }
         } else {
@@ -240,8 +241,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         errorNoConnection.setVisibility(View.INVISIBLE);
         btnTryAgain = (Button) findViewById(R.id.btn_main_try_again);
         btnTryAgain.setVisibility(View.GONE);
-        if(action!=ACTION_SEARCH_TOP_RATED&&action!=ACTION_START_DETAILS_ACTIVITY&&action!=ACTION_SEARCH_FAVOURITES){
-            action=ACTION_SEARCH_POPULAR;
+        txtVwAddFavouritesmessage=(TextView)findViewById(R.id.txtVw_add_favourites_message);
+        txtVwAddFavouritesmessage.setVisibility(View.GONE);
+        if (action != ACTION_SEARCH_TOP_RATED && action != ACTION_START_DETAILS_ACTIVITY && action != ACTION_SEARCH_FAVOURITES) {
+            action = ACTION_SEARCH_POPULAR;
         }
     }
 
@@ -283,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         mRecyclerView.setVisibility(View.INVISIBLE);
         errorNoConnection.setVisibility(View.VISIBLE);
         btnTryAgain.setVisibility(View.VISIBLE);
+        txtVwAddFavouritesmessage.setVisibility(View.GONE);
     }
 
     /**
@@ -321,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     private void startDetailsActivity() {
         Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
         intent.putExtra("clickedMovieId", clickedMovieId);
-        if (checkNetworkConnection()) {
+        if (NetworkUtils.checkNetworkConnection(this)) {
             if (Build.VERSION.SDK_INT >= 21) {
                 Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this)
                         .toBundle();
@@ -340,14 +344,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
      * or show a toast with an error message
      */
     private void tryAgain() {
-        if (checkNetworkConnection()) {
+        if (NetworkUtils.checkNetworkConnection(this)) {
             if (action == ACTION_START_DETAILS_ACTIVITY) {
                 startDetailsActivity();
             } else if (action == ACTION_SEARCH_POPULAR) {
                 loadMovieData(POPULAR_SEARCH);
-            }  else if (action == ACTION_SEARCH_FAVOURITES) {
-                getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS,null,favourites_loader);
-            }else {
+            } else if (action == ACTION_SEARCH_FAVOURITES) {
+                errorNoConnection.setVisibility(View.INVISIBLE);
+                btnTryAgain.setVisibility(View.INVISIBLE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+                getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS, null, favourites_loader);
+            } else {
                 loadMovieData(TOP_RATED_SEARCH);
             }
         } else {
@@ -374,25 +382,28 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.popular_search:
-                if (checkNetworkConnection()) {
+                if (NetworkUtils.checkNetworkConnection(this)) {
                     loadMovieData(POPULAR_SEARCH);
                     action = ACTION_SEARCH_POPULAR;
+                    txtVwAddFavouritesmessage.setVisibility(View.GONE);
                 } else {
                     action = ACTION_SEARCH_POPULAR;
                     showErrorMessage();
                 }
                 return true;
             case R.id.top_rated_search:
-                if (checkNetworkConnection()) {
+                if (NetworkUtils.checkNetworkConnection(this)) {
                     loadMovieData(TOP_RATED_SEARCH);
                     action = ACTION_SEARCH_TOP_RATED;
+                    txtVwAddFavouritesmessage.setVisibility(View.GONE);
                 } else {
                     action = ACTION_SEARCH_TOP_RATED;
                     showErrorMessage();
                 }
                 return true;
             case R.id.favourites_search:
-                if (checkNetworkConnection()) {
+                if (NetworkUtils.checkNetworkConnection(this)) {
+                    txtVwAddFavouritesmessage.setVisibility(View.GONE);
                     getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS, null, favourites_loader);
                     action = ACTION_SEARCH_FAVOURITES;
                 } else {
@@ -406,17 +417,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     }
 
-    /**
-     * Check if the device is connected to a network.
-     *
-     * @return
-     */
-    private boolean checkNetworkConnection() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
+
 
     @Override
     public Loader<ArrayList<Movie>> onCreateLoader(int id, final Bundle args) {

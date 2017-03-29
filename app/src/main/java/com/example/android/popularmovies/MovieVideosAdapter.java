@@ -5,13 +5,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.android.popularmovies.utilities.NetworkUtils;
 
 import java.util.ArrayList;
 
 
 public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.MovieVideosViewHolder> {
-    Button btnWatchTrailer;
+    TextView txtVwTrailerTitle;
     ArrayList<String> videosIds;
     private Context context;
     private goToYoutubeClickListener currentGoToYoutubeClickListener;
@@ -28,14 +31,12 @@ public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
         View view = inflater.inflate(LayoutIdForVideoId, parent, shouldAttachToParentImmediately);
-        MovieVideosViewHolder movieVideosViewHolder = new MovieVideosViewHolder(view);
-        return movieVideosViewHolder;
+        return new MovieVideosViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(MovieVideosViewHolder holder, int position) {
-        String currentVideoId = videosIds.get(position);
-        btnWatchTrailer.setText(currentVideoId);
+        txtVwTrailerTitle.setText("Trailer N°"+(position+1));
     }
 
     @Override
@@ -56,15 +57,19 @@ public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.
     public class MovieVideosViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public MovieVideosViewHolder(View itemView) {
             super(itemView);
-            btnWatchTrailer = (Button) itemView.findViewById(R.id.btn_watch_trailer);
+            txtVwTrailerTitle = (TextView) itemView.findViewById(R.id.txtVw_trailer_title);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            if(NetworkUtils.checkNetworkConnection(context)){
             int position = getAdapterPosition();
             String videoId = videosIds.get(position);
-            currentGoToYoutubeClickListener.goToYoutube(videoId);
+            currentGoToYoutubeClickListener.goToYoutube(videoId);}
+            else{
+                Toast.makeText(context,"No connection,check your network state and try again",Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

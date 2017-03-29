@@ -342,9 +342,11 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public void onLoadFinished(Loader loader, Movie data) {
         displayMovieDetails(data);
     }
+
     @Override
     public void onLoaderReset(Loader loader) {
     }
+
     @Override
     public void goToYoutube(String videoId) {
         URL url = NetworkUtils.buildUrlForYoutube(videoId);
@@ -352,42 +354,4 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         i.setData(Uri.parse(url.toString()));
         startActivity(i);
     }
-
-
-
-
-   /* private class fetchMovieDetailsTask extends AsyncTask<String, Void, Movie> {
-
-         //request te movie's details to display
-
-        @Override
-        protected Movie doInBackground(String... params) {
-
-            if (params.length == 0) {
-                return null;
-            }
-
-            String movieId = params[0];
-            URL movieDetailsRequestURL = NetworkUtils.buildUrlForDetails(movieId);
-
-            try {
-                String jsonMovieDetailsResponse = NetworkUtils
-                        .getResponseFromHttpUrl(movieDetailsRequestURL);
-                Movie movieSelected = JSONUtils
-                        .getMovieDetailsFromJson(jsonMovieDetailsResponse);
-                return movieSelected;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Movie movie) {
-            displayMovieDetails(movie);
-        }
-    }
-*/
-
 }

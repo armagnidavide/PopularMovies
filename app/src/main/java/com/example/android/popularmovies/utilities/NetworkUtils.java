@@ -1,6 +1,9 @@
 package com.example.android.popularmovies.utilities;
 
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 
 import java.io.IOException;
@@ -26,6 +29,17 @@ public class NetworkUtils {
     private static final String REVIEWS_PATH = "reviews";
     private static final String VIDEOS_PATH = "videos";
     private static final String API_KEY = "your-api-key";
+    /**
+     * Check if the device is connected to a network.
+     *
+     * @return
+     */
+    public static boolean checkNetworkConnection(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
 
     /**
      * Build and returns the Url for the search in MainActivity

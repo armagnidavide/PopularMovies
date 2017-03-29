@@ -91,10 +91,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <Button
+                    android:minWidth="80dp"
+                    android:padding="8dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
                     android:id="@+id/btn_add_as_favourites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="mark as favourite"
                     android:background="@drawable/favourites_selector"
                     android:layout_margin="16dp"/>
             </LinearLayout>
