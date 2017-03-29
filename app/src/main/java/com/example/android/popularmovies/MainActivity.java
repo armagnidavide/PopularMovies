@@ -3,6 +3,7 @@ package com.example.android.popularmovies;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -26,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmovies.dataPersistence.FavouriteMoviesContract;
 import com.example.android.popularmovies.utilities.DesignUtils;
 import com.example.android.popularmovies.utilities.JSONUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -37,12 +39,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     //Two parameters for 2 types of searches
     private final static String POPULAR_SEARCH = "popular";
     private final static String TOP_RATED_SEARCH = "top_rated";
+    private final static String FAVOURITES_SEARCH = "favourites";
     //Values for the retry button when there is a lack of connection,
     //in this way it knows what to do if the connection comes back.
-    private final static int ACTION_START_DETAILS_ACTIVITY = 0;
-    private final static int ACTION_SEARCH_POPULAR = 1;
-    private final static int ACTION_SEARCH_TOP_RATED = 2;
-    private static final int LOADER_RATED_POPULAR = 101;
+    private final static int ACTION_START_DETAILS_ACTIVITY = 1;
+    private final static int ACTION_SEARCH_POPULAR = 2;
+    private final static int ACTION_SEARCH_TOP_RATED = 3;
+    private final static int ACTION_SEARCH_FAVOURITES=4;
     //Respectively RecyclerView,the adapter,the data,the LayoutManager
     private RecyclerView mRecyclerView;
     private MoviesAdapter moviesAdapter;
@@ -54,26 +57,157 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
     private Button btnTryAgain;
     private Toast mToast;
     private int action;
+    private static final int LOADER_RATED_POPULAR = 101;
+    private static final int LOADER_FAVOURITES_IDS = 102;
+    private static final int LOADER_FAVOURITES_THUMBNAILS = 103;
+
+    private LoaderManager.LoaderCallbacks<Cursor> favourites_loader;
+    private LoaderManager.LoaderCallbacks<ArrayList<Movie>> favourites_thumbnails_loader;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupWindowAnimations();
+        checkPreviousState(savedInstanceState);
         initializations();
+        initializeLoader();
         setListeners();
         displayMovieGrid();
     }
+
+    private void checkPreviousState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            action=savedInstanceState.getInt("action");
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("action",action);
+
+    }
+
+    private void initializeLoader() {
+        favourites_thumbnails_loader = new LoaderManager.LoaderCallbacks<ArrayList<Movie>>() {
+            @Override
+            public Loader<ArrayList<Movie>> onCreateLoader(int id, final Bundle args) {
+                return new AsyncTaskLoader<ArrayList<Movie>>(getApplicationContext()) {
+                    @Override
+                    protected void onStartLoading() {
+                        super.onStartLoading();
+                        forceLoad();
+                    }
+
+                    @Override
+                    public ArrayList<Movie> loadInBackground() {
+                        if (args.size() == 0) {
+                            return null;
+                        }
+                        int[] movieIds = args.getIntArray("movieIds");
+                        try {
+                            ArrayList<Movie> favouriteMovies = new ArrayList<>();
+                            for (int i = 0; i < movieIds.length; i++) {
+                                URL movieDetailsRequestURL = NetworkUtils.buildUrlForDetails(String.valueOf(movieIds[i]));
+                                String jsonMovieDetailsResponse = NetworkUtils
+                                        .getResponseFromHttpUrl(movieDetailsRequestURL);
+                                Movie favouriteMovie = JSONUtils
+                                        .getBasicMovieDataFromJson(jsonMovieDetailsResponse);
+                                favouriteMovies.add(favouriteMovie);
+
+                            }
+                            return favouriteMovies;
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }
+                };
+            }
+
+            @Override
+            public void onLoadFinished(Loader<ArrayList<Movie>> loader, ArrayList<Movie> movies) {
+                progressBar.setVisibility(View.INVISIBLE);
+                movieForGridItems = movies;
+                moviesAdapter.setMoviesData(movies);
+            }
+
+            @Override
+            public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
+
+            }
+        };
+
+        favourites_loader = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
+                    @Override
+                    protected void onStartLoading() {
+                        super.onStartLoading();
+                        forceLoad();
+                    }
+
+                    @Override
+                    public Cursor loadInBackground() {
+                        return getContentResolver().query(FavouriteMoviesContract.FavouritesEntry.CONTENT_URI,
+                                null,
+                                null,
+                                null,
+                                null);
+                    }
+                };
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                if (data.getCount() > 0) {
+                    int[] movieIds = new int[data.getCount()];
+                    data.moveToFirst();
+                    for (int i = 0; i < data.getCount(); i++) {
+                        data.moveToPosition(i);
+                        movieIds[i] = data.getInt(data.getColumnIndex(FavouriteMoviesContract.FavouritesEntry.COLUMN_MOVIE_ID));
+                    }
+                    Bundle bundle = new Bundle();
+                    bundle.putIntArray("movieIds", movieIds);
+                    getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_THUMBNAILS, bundle, favourites_thumbnails_loader);
+                } else {
+                    Toast.makeText(getApplicationContext(), "COUNT =0", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+
+            }
+        };
+
+
+    }
+
 
     /**
      * Displays a grid of movies posters if there is connection
      */
     private void displayMovieGrid() {
         if (checkNetworkConnection()) {
-            loadMovieData(POPULAR_SEARCH);
+            switch (action){
+                case ACTION_SEARCH_POPULAR:
+                    loadMovieData(POPULAR_SEARCH);
+                    break;
+                case ACTION_SEARCH_TOP_RATED:
+                    loadMovieData(TOP_RATED_SEARCH);
+                    break;
+                case ACTION_SEARCH_FAVOURITES:
+                    getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS,null,favourites_loader);
+                    break;
+            }
         } else {
             showErrorMessage();
-            action = ACTION_SEARCH_POPULAR;
         }
     }
 
@@ -106,6 +240,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         errorNoConnection.setVisibility(View.INVISIBLE);
         btnTryAgain = (Button) findViewById(R.id.btn_main_try_again);
         btnTryAgain.setVisibility(View.GONE);
+        if(action!=ACTION_SEARCH_TOP_RATED&&action!=ACTION_START_DETAILS_ACTIVITY&&action!=ACTION_SEARCH_FAVOURITES){
+            action=ACTION_SEARCH_POPULAR;
+        }
     }
 
     /**
@@ -161,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
         progressBar.setVisibility(View.VISIBLE);
         Bundle bundle = new Bundle();
         bundle.putString("search", typeOfSearch);
-        getSupportLoaderManager().initLoader(LOADER_RATED_POPULAR, bundle, this);
+        getSupportLoaderManager().restartLoader(LOADER_RATED_POPULAR, bundle, this);
         //new FetchMovieTask().execute(typeOfSearch);
     }
 
@@ -208,7 +345,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
                 startDetailsActivity();
             } else if (action == ACTION_SEARCH_POPULAR) {
                 loadMovieData(POPULAR_SEARCH);
-            } else {
+            }  else if (action == ACTION_SEARCH_FAVOURITES) {
+                getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS,null,favourites_loader);
+            }else {
                 loadMovieData(TOP_RATED_SEARCH);
             }
         } else {
@@ -237,16 +376,27 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
             case R.id.popular_search:
                 if (checkNetworkConnection()) {
                     loadMovieData(POPULAR_SEARCH);
+                    action = ACTION_SEARCH_POPULAR;
                 } else {
                     action = ACTION_SEARCH_POPULAR;
                     showErrorMessage();
                 }
                 return true;
-            case R.id.top_rated__search:
+            case R.id.top_rated_search:
                 if (checkNetworkConnection()) {
                     loadMovieData(TOP_RATED_SEARCH);
+                    action = ACTION_SEARCH_TOP_RATED;
                 } else {
                     action = ACTION_SEARCH_TOP_RATED;
+                    showErrorMessage();
+                }
+                return true;
+            case R.id.favourites_search:
+                if (checkNetworkConnection()) {
+                    getSupportLoaderManager().restartLoader(LOADER_FAVOURITES_IDS, null, favourites_loader);
+                    action = ACTION_SEARCH_FAVOURITES;
+                } else {
+                    action = ACTION_SEARCH_FAVOURITES;
                     showErrorMessage();
                 }
                 return true;
@@ -314,52 +464,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Gri
 
     @Override
     public void onLoaderReset(Loader<ArrayList<Movie>> loader) {
+
     }
-
-
-   /*private class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Movie>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        //Start an AsyncTask to download movies' data in background
-
-        @Override
-        protected ArrayList<Movie> doInBackground(String... params) {
-
-            if (params.length == 0) {
-                return null;
-            }
-
-            String typeOfSearch = params[0];
-            URL movieRequestURL = NetworkUtils.buildUrl(typeOfSearch);
-
-            try {
-                String jsonMovieResponse = NetworkUtils
-                        .getResponseFromHttpUrl(movieRequestURL);
-                ArrayList<Movie> movieForGridItems = JSONUtils
-                        .getBasicMoviesDataFromJson(jsonMovieResponse);
-                return movieForGridItems;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-
-         // Hide the ProgressBar and changes the data in the adapter
-         // @param movies new movies' data
-
-        @Override
-        protected void onPostExecute(ArrayList<Movie> movies) {
-            progressBar.setVisibility(View.INVISIBLE);
-            movieForGridItems = movies;
-            moviesAdapter.setMoviesData(movies);
-        }
-    }*/
 
 
 }

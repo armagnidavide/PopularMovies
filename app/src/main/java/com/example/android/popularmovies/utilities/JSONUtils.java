@@ -41,6 +41,17 @@ public class JSONUtils {
     }
 
     /**
+     * Create an Movie from the jsonResponse and returns it
+     */
+    public static Movie getBasicMovieDataFromJson(String jsonResponse)
+            throws JSONException {
+        JSONObject movieDetails = new JSONObject(jsonResponse);
+        String posterPath = movieDetails.getString(POSTER_PATH);
+            int id = movieDetails.getInt(ID);
+        return new Movie(id, posterPath);
+    }
+
+    /**
      * Create a Movie object with all the details from the jsonResponse and returns it
      */
     public static Movie getMovieDetailsFromJson(String jsonDetailsResponse, String jsonReviewsResponse, String jsonVideoResponse) throws JSONException {
