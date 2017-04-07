@@ -14,7 +14,8 @@ import static com.example.android.popularmovies.dataPersistence.FavouriteMoviesC
 
 public class FavouriteMoviesContentProvider extends ContentProvider {
 
-
+    public static final int MOST_POPULAR = 98;
+    public static final int TOP_RATED = 99;
     public static final int FAVOURITES = 100;
     public static final int FAVOURITES_ID = 101;
 
@@ -23,6 +24,8 @@ public class FavouriteMoviesContentProvider extends ContentProvider {
     public static UriMatcher buildUriMatcher() {
 
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        uriMatcher.addURI(FavouriteMoviesContract.CONTENT_AUTHORITY, FavouriteMoviesContract.MOST_POPULAR_PATH, MOST_POPULAR);
+        uriMatcher.addURI(FavouriteMoviesContract.CONTENT_AUTHORITY, FavouriteMoviesContract.TOP_RATED_PATH, TOP_RATED);
         uriMatcher.addURI(FavouriteMoviesContract.CONTENT_AUTHORITY, FavouriteMoviesContract.FAVOURITES_PATH, FAVOURITES);
         uriMatcher.addURI(FavouriteMoviesContract.CONTENT_AUTHORITY, FavouriteMoviesContract.FAVOURITES_PATH + "/#", FAVOURITES_ID);
 
@@ -50,6 +53,22 @@ public class FavouriteMoviesContentProvider extends ContentProvider {
                 long id = db.insert(TABLE_NAME, null, values);
                 if ( id > 0 ) {
                     returnUri = ContentUris.withAppendedId(FavouriteMoviesContract.FavouritesEntry.CONTENT_URI, id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+            case MOST_POPULAR:
+                long mostPopularId = db.insert(FavouriteMoviesContract.MostPopularEntry.TABLE_NAME, null, values);
+                if ( mostPopularId > 0 ) {
+                    returnUri = ContentUris.withAppendedId(FavouriteMoviesContract.MostPopularEntry.CONTENT_URI, mostPopularId);
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+            case TOP_RATED:
+                long topRatedId = db.insert(FavouriteMoviesContract.TopRatedEntry.TABLE_NAME, null, values);
+                if ( topRatedId > 0 ) {
+                    returnUri = ContentUris.withAppendedId(FavouriteMoviesContract.TopRatedEntry.CONTENT_URI, topRatedId);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
@@ -90,6 +109,24 @@ public class FavouriteMoviesContentProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case MOST_POPULAR:
+                retCursor =  db.query(FavouriteMoviesContract.MostPopularEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            case TOP_RATED:
+                retCursor =  db.query(FavouriteMoviesContract.TopRatedEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -112,6 +149,12 @@ public class FavouriteMoviesContentProvider extends ContentProvider {
                 String idStr = path.substring(path.lastIndexOf('/') + 1);
                 selectionArgs=new String[]{idStr};
                 moviesDeleted = db.delete(TABLE_NAME, selection, selectionArgs);
+                break;
+            case MOST_POPULAR:
+                moviesDeleted = db.delete(FavouriteMoviesContract.MostPopularEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case TOP_RATED:
+                moviesDeleted = db.delete(FavouriteMoviesContract.TopRatedEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

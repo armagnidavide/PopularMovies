@@ -14,20 +14,21 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 /**
- * provides new Views for the RecyclerView when it's needed and to bind movies' data from the network to the views
+ * provides new Views for the RecyclerView when it's needed and it binds movies' data to the views.
  */
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
     private ArrayList<Movie> moviesForGrid;
     private GridItemClickListener currentGridItemClickListener;
     private Context context;
+    private boolean actualConnection;
 
-    public MoviesAdapter(ArrayList<Movie> movies, GridItemClickListener gridItemClickListener) {
+    public MoviesAdapter(ArrayList<Movie> movies, GridItemClickListener gridItemClickListener,boolean connectionStatus) {
         moviesForGrid = movies;
         currentGridItemClickListener = gridItemClickListener;
+        actualConnection=connectionStatus;
     }
-
     /**
-     * create a View with the item-layout then pass it to the movieViewHolder constructor and return a movieViewHolder
+     * Creates a View with the item-layout then passes it to the movieViewHolder constructor and returns a movieViewHolder
      */
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -41,7 +42,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     /**
-     * Bind Data to View objects
+     * Binds Data to View objects
      */
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
@@ -49,7 +50,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     /**
-     * return the number of items to display
+     * Return the number of items to display
      */
     @Override
     public int getItemCount() {
@@ -61,7 +62,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     /**
-     * return the movie's poster size to download the movie's poster image
+     * Return the movie's poster size to download the movie's poster image
      */
     private String calculatePosterSize() {
         float density = context.getResources().getDisplayMetrics().density;
@@ -72,7 +73,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
      * notify that the data is changed
      * LayoutManagers will be forced to fully rebind and relayout all visible views
      */
-    public void setMoviesData(ArrayList<Movie> moviesData) {
+    public void setMoviesData(ArrayList<Movie> moviesData,boolean connectionStatus) {
+        actualConnection=connectionStatus;
         moviesForGrid = moviesData;
         notifyDataSetChanged();
     }
@@ -106,10 +108,17 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
         public void bind(int currentMovie) {
             Movie currentMovieForGridItem = moviesForGrid.get(currentMovie);
+            /*movieThumbnail.setImageBitmap(currentMovieForGridItem.getMovieImage());*/
+
+           if(actualConnection){
+                movieThumbnail.setImageBitmap(currentMovieForGridItem.getMovieImage());
             String posterPath = currentMovieForGridItem.getPosterPath();
             String basicUrl = "https://image.tmdb.org/t/p";
             String imageUrl = basicUrl + calculatePosterSize() + posterPath;
-            Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail);
+            Picasso.with(movieThumbnail.getContext()).load(imageUrl).into(movieThumbnail); }
+            else{
+                movieThumbnail.setImageBitmap(currentMovieForGridItem.getMovieImage());
+            }
         }
 
         @Override

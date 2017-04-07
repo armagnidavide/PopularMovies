@@ -34,23 +34,12 @@ public class JSONUtils {
             JSONObject movie = movies.getJSONObject(i);
             String posterPath = movie.getString(POSTER_PATH);
             int id = movie.getInt(ID);
-            Movie movieForGridItem = new Movie(id, posterPath);
+            String title = movie.getString(TITLE);
+            Movie movieForGridItem = new Movie(id, title, posterPath);
             movieForGridItems.add(movieForGridItem);
         }
         return movieForGridItems;
     }
-
-    /**
-     * Create an Movie from the jsonResponse and returns it
-     */
-    public static Movie getBasicMovieDataFromJson(String jsonResponse)
-            throws JSONException {
-        JSONObject movieDetails = new JSONObject(jsonResponse);
-        String posterPath = movieDetails.getString(POSTER_PATH);
-            int id = movieDetails.getInt(ID);
-        return new Movie(id, posterPath);
-    }
-
     /**
      * Create a Movie object with all the details from the jsonResponse and returns it
      */
@@ -67,7 +56,7 @@ public class JSONUtils {
     }
 
     /**
-     * Returns an ArrayList of Strings with the movie's reviews
+     * Returns an ArrayList of Strings with movie's reviews
      */
     public static ArrayList<MovieReview> getMovieReviewsFromJson(String jsonResponse) throws JSONException {
         JSONObject movieReviews = new JSONObject(jsonResponse);
@@ -79,8 +68,9 @@ public class JSONUtils {
         }
         return reviews;
     }
+
     /**
-     * Returns an ArrayList of Strings with the movie's videos' keys.
+     * Returns an ArrayList of Strings with the movie video keys.
      */
     public static ArrayList<String> getMovieVideosFromJson(String jsonResponse) throws JSONException {
         JSONObject movieVideos = new JSONObject(jsonResponse);
@@ -89,6 +79,7 @@ public class JSONUtils {
         for (int i = 0; i < videosJson.length(); i++) {
             JSONObject singleVideo = videosJson.getJSONObject(i);
             videos.add(singleVideo.getString("key"));
+            if(i==2){break;}
         }
         return videos;
     }

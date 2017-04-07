@@ -12,10 +12,12 @@ import com.example.android.popularmovies.utilities.NetworkUtils;
 
 import java.util.ArrayList;
 
-
+/*
+This is the adapter for the Youtube Videos in DetailsActivity.
+ */
 public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.MovieVideosViewHolder> {
-    TextView txtVwTrailerTitle;
-    ArrayList<String> videosIds;
+    private TextView txtVwTrailerTitle;
+    private ArrayList<String> videosIds;
     private Context context;
     private goToYoutubeClickListener currentGoToYoutubeClickListener;
 

@@ -4,8 +4,10 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.support.v7.widget.RecyclerView;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -30,52 +33,106 @@ import com.example.android.popularmovies.utilities.DesignUtils;
 import com.example.android.popularmovies.utilities.JSONUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Movie>, MovieVideosAdapter.goToYoutubeClickListener {
+    //basic url to download movie's image
+    private final static String BASIC_URL = "https://image.tmdb.org/t/p";
+    //4 loader Ids 1 to download movie's details, the 2nd to add this movie as a favourite,
+    //the 3rd to check if a movie is a favourite one and the 4th to remove it from favourites
+    private final static int DETAIL_LOADER_ID = 101;
+    private final static int LOADER_ADD_FAVOURITE = 102;
+    private final static int LOADER_CHECK_FAVOURITE = 103;
+    private final static int LOADER_REMOVE_FROM_FAVOURITES = 104;
+    //Views to display movie's details
     private ImageView poster;
     private TextView title;
     private TextView voteAverage;
     private TextView releaseDate;
     private TextView overview;
+
+    //variables to store movie's details
     private int movieId;
-    private Typeface courgette;//font for the movie's title
-    private final static String BASIC_URL = "https://image.tmdb.org/t/p";
-    private final static int DETAIL_LOADER_ID = 101;
-    private final static int LOADER_ADD_FAVOURITE = 102;
-    private final static int LOADER_CHECK_FAVOURITE = 103;
-    private final static int LOADER_REMOVE_FROM_FAVOURITES = 104;
-    private RecyclerView reviewsRecyclerView;
+    private String movieTitle;
+    private byte[] movieThumbnail;
     private ArrayList<MovieReview> movieReviews;
-    private MovieReviewsAdapter movieReviewsAdapter;
-    private RecyclerView videosRecyclerView;
     private ArrayList<String> videosIds;
+
+    //font for the movie's title
+    private Typeface courgette;
+
+    //RecyclerViews and Adapters for Reviews and Trailers
+    private RecyclerView reviewsRecyclerView;
+    private RecyclerView videosRecyclerView;
     private MovieVideosAdapter movieVideosAdapter;
+    private MovieReviewsAdapter movieReviewsAdapter;
+
+    //Button to add or remove a movie from favourites
     private Button btnAddFavourite;
+
     private LoaderManager.LoaderCallbacks<Cursor> checkLoader;
     private LoaderManager.LoaderCallbacks<Uri> addLoader;
     private LoaderManager.LoaderCallbacks<String> removeLoader;
+
     private boolean isFavourite;
+    //to store the kind of movies were displayed in the grid in MainActivity, doing so when we come back
+    //the same grid of movies is presented. (most popular or top rated or favourites)
+    private int action;
+
+    /**
+     * convert a bitmap into a byte array
+     * @param bitmap the image that has to be converted
+     * @return the bitmap converted to byte array
+     */
+    public static byte[] getBitmapAsByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+        return outputStream.toByteArray();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         setupWindowAnimations();
+        getInfoFromMainActivity();
+        initializeLoaders();
         initializations();
         setListeners();
 
     }
 
+    /**
+     * we want the same behaviour for the up button and the back button.So when they are pressed, onBackPressed() is called.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * starts the MainActivity with an intent containing the same action's value that MainActivity was having before.
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(DetailsActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra("action", action);
+        startActivity(intent);
+    }
 
     private void initializations() {
-        Intent intent = getIntent();
-        movieId = intent.getIntExtra("clickedMovieId", 0);
-        initializeLoaders();
-        btnAddFavourite = (Button) findViewById(R.id.btn_add_as_favourites);
         courgette = Typeface.createFromAsset(getAssets(), "Courgette-Regular.ttf");
+        btnAddFavourite = (Button) findViewById(R.id.btn_add_as_favourites);
         poster = (ImageView) findViewById(R.id.details_poster);
         title = (TextView) findViewById(R.id.details_title);
         title.setTypeface(courgette);
@@ -89,7 +146,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         movieReviews = new ArrayList<>();
         movieReviewsAdapter = new MovieReviewsAdapter(movieReviews);
         reviewsRecyclerView.setAdapter(movieReviewsAdapter);
-
         videosRecyclerView = (RecyclerView) findViewById(R.id.recyclerView_videos);
         LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(this);
         videosRecyclerView.setLayoutManager(linearLayoutManager2);
@@ -97,9 +153,14 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         videosIds = new ArrayList<>();
         movieVideosAdapter = new MovieVideosAdapter(videosIds, this);
         videosRecyclerView.setAdapter(movieVideosAdapter);
-        //new fetchMovieDetailsTask().execute(String.valueOf(movieId));
-        getSupportLoaderManager().initLoader(DETAIL_LOADER_ID, null, this);
+        startDetailsLoader();
         checkIfIsFavourite();
+    }
+
+    private void getInfoFromMainActivity() {
+        Intent intent = getIntent();
+        movieId = intent.getIntExtra("clickedMovieId", 0);
+        action = intent.getIntExtra("action", 0);
     }
 
     private void initializeLoaders() {
@@ -125,9 +186,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 if (data != null && data.getCount() > 0) {
-                    btnAddFavourite.setText("Remove from favourites");
+                    btnAddFavourite.setText(R.string.activity_details_btn_remove);
                     isFavourite = true;
                 } else {
+                    btnAddFavourite.setText(R.string.activity_details_btn_add);
                     isFavourite = false;
                 }
             }
@@ -151,6 +213,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                     public Uri loadInBackground() {
                         ContentValues cv = new ContentValues();
                         cv.put(FavouriteMoviesContract.FavouritesEntry.COLUMN_MOVIE_ID, movieId);
+                        cv.put(FavouriteMoviesContract.FavouritesEntry.COLUMN_MOVIE_TITLE, movieTitle);
+                        cv.put(FavouriteMoviesContract.FavouritesEntry.COLUMN_MOVIE_THUMBNAIL, movieThumbnail);
                         return getContentResolver().insert(FavouriteMoviesContract.FavouritesEntry.CONTENT_URI, cv);
                     }
                 };
@@ -159,8 +223,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             @Override
             public void onLoadFinished(Loader<Uri> loader, Uri data) {
                 if (data != null) {
-                    Toast.makeText(getApplicationContext(), "Movie added successfully", Toast.LENGTH_LONG).show();
-                    btnAddFavourite.setText("Remove from favourites");
+                    Toast.makeText(getApplicationContext(), R.string.activity_details_toast_movie_added, Toast.LENGTH_LONG).show();
+                    btnAddFavourite.setText(R.string.activity_details_btn_remove);
                     isFavourite = true;
                 }
 
@@ -197,8 +261,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             @Override
             public void onLoadFinished(Loader<String> loader, String data) {
                 if (data != null) {
-                    Toast.makeText(getApplicationContext(), "Movie removed successfully", Toast.LENGTH_LONG).show();
-                    btnAddFavourite.setText("Mark as favourite");
+                    Toast.makeText(getApplicationContext(), R.string.activity_details_toast_movie_removed, Toast.LENGTH_LONG).show();
+                    btnAddFavourite.setText(R.string.activity_details_btn_add);
                     isFavourite = false;
                 }
 
@@ -210,6 +274,14 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             }
         };
     }
+
+    /**
+     * starts a loader to download movie's details
+     */
+    private void startDetailsLoader() {
+        getSupportLoaderManager().initLoader(DETAIL_LOADER_ID, null, this);
+    }
+
 
     private void setListeners() {
         btnAddFavourite.setOnClickListener(new View.OnClickListener() {
@@ -224,6 +296,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         });
     }
 
+    /**
+     * Shows a confirmation dialog when the user presses btnAddFavourite and the movie is already a favourite one
+     */
     private void showRemoveConfirmationDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Remove Movie")
@@ -238,15 +313,19 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
+    /**
+     * Starts a loader to add this movie to favourites
+     */
     private void addAsFavourite() {
         getSupportLoaderManager().initLoader(LOADER_ADD_FAVOURITE, null, addLoader);
     }
-
+    /**
+     * Starts a loader to acheck if this movie is a favourite one
+     */
     private boolean checkIfIsFavourite() {
         getSupportLoaderManager().initLoader(LOADER_CHECK_FAVOURITE, null, checkLoader);
         return false;
     }
-
 
     /**
      * set a slide-enter-transition and a fade-return-transition
@@ -270,30 +349,48 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private void displayMovieDetails(Movie movie) {
         String posterPath = movie.getPosterPath();
         displayImageFromUrl(posterPath);
-        title.setText(movie.getTitle());
-        voteAverage.setText(String.valueOf(movie.getVoteAverage()));
-        releaseDate.setText(movie.getReleaseDate());
+        movieTitle = movie.getTitle();
+        title.setText(" "+movie.getTitle());
+        voteAverage.setText(" "+String.valueOf(movie.getVoteAverage()));
+        releaseDate.setText(" "+movie.getReleaseDate());
         overview.setText(movie.getOverview());
         movieReviews = movie.getReviews();
         videosIds = movie.getVideosIds();
         movieReviewsAdapter.setMoviesData(movieReviews);
         movieVideosAdapter.setMovieData(videosIds);
-
     }
 
     /**
      * show the movie's poster image inside the ImageView using the Picasso external-library
+     * and store the image in a variable in case the user wants to add the movie to favourites in the db.
      */
     private void displayImageFromUrl(String posterPath) {
-        String basicUrl = BASIC_URL;
         String fixedSizeForPoster;
         fixedSizeForPoster = calculatePosterSize();
-        String imageUrl = basicUrl + fixedSizeForPoster + posterPath;
-        Picasso.with(getApplicationContext()).load(imageUrl).into(poster);
+        String imageUrl = BASIC_URL + fixedSizeForPoster + posterPath;
+        Target target = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                movieThumbnail = getBitmapAsByteArray(bitmap);
+                poster.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+            }
+        };
+        poster.setTag(target);
+        Picasso.with(getApplicationContext()).load(imageUrl).into(target);
     }
 
     /**
-     * calculate the size of the image to download
+     * Calculates the size of the image to download
      */
     private String calculatePosterSize() {
         float density = getResources().getDisplayMetrics().density;
@@ -318,17 +415,12 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 URL movieDetailsRequestURL = NetworkUtils.buildUrlForDetails(String.valueOf(movieId));
                 URL movieReviewsUrl = NetworkUtils.buildUrlForReviews(String.valueOf(movieId));
                 URL movieVideosUrl = NetworkUtils.buildUrlForVideos(String.valueOf(movieId));
-
-
                 try {
                     String jsonMovieDetailsResponse = NetworkUtils
                             .getResponseFromHttpUrl(movieDetailsRequestURL);
                     String reviews = NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
                     String videos = NetworkUtils.getResponseFromHttpUrl(movieVideosUrl);
-                    Movie movieSelected = JSONUtils
-                            .getMovieDetailsFromJson(jsonMovieDetailsResponse, reviews, videos);
-                    return movieSelected;
-
+                    return JSONUtils.getMovieDetailsFromJson(jsonMovieDetailsResponse, reviews, videos);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -347,6 +439,10 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public void onLoaderReset(Loader loader) {
     }
 
+    /**
+     * When a video item is pressed the youtube site is opened to play the video
+     * @param videoId the key that identify the video on youtube
+     */
     @Override
     public void goToYoutube(String videoId) {
         URL url = NetworkUtils.buildUrlForYoutube(videoId);

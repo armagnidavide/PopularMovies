@@ -40,7 +40,7 @@
                     style="@style/details_labels"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Title : " />
+                    android:text="@string/activity_details_movie_title" />
 
                 <TextView
                     android:id="@+id/details_title"
@@ -59,7 +59,7 @@
                     style="@style/details_labels"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Vote Average : " />
+                    android:text="@string/activity_details_vote_average" />
 
                 <TextView
                     android:id="@+id/details_vote_average"
@@ -78,7 +78,7 @@
                     style="@style/details_labels"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Release Date : " />
+                    android:text="@string/activity_details_release_date" />
 
                 <TextView
                     android:id="@+id/details_release_date"
@@ -86,20 +86,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <Button
-                    android:minWidth="80dp"
-                    android:padding="8dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
                     android:id="@+id/btn_add_as_favourites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="16dp"
                     android:background="@drawable/favourites_selector"
-                    android:layout_margin="16dp"/>
+                    android:gravity="center"
+                    android:minWidth="80dp"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <TextView
@@ -108,19 +110,34 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
-                android:layout_margin="16dp"
-                android:text="Reviews:"
-                android:layout_gravity="left"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_margin="16dp"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorAccent"
+                android:text="@string/activity_details_trailers" />
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerView_videos"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_margin="16dp"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorAccent"
+                android:text="@string/activity_details_reviews" />
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerView_reviews"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </ScrollView>
 

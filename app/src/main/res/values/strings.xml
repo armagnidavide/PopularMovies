@@ -1,5 +1,21 @@
 <resources>
     <string name="app_name">PopularMovies</string>
     <string name="content_description_grid_item_imageview">movie\'s poster</string>
+    <string name="activity_details_movie_title">Title : </string>
+    <string name="activity_details_vote_average">Vote Average : </string>
+    <string name="activity_details_release_date">Release Date : </string>
+    <string name="activity_details_reviews">Reviews: </string>
+    <string name="menu_item_popular">popular</string>
+    <string name="menu_item_top_rated">top rated</string>
+    <string name="menu_item_favourites">favourites</string>
+    <string name="activity_details_btn_remove">Remove from favourites</string>
+    <string name="activity_details_btn_add">Add to favourites</string>
+    <string name="activity_details_toast_movie_added">Movie added successfully</string>
+    <string name="activity_details_toast_movie_removed">Movie removed successfully</string>
+    <string name="activity_main_hint_most_popular_movies">Connect your device to see the most popular movies</string>
+    <string name="activity_main_no_connection">No connection available</string>
+    <string name="activity_main_hint_top_rated_movies">Connect your device to see the top rated movies</string>
+    <string name="activity_main_hint_favourite_movies">No favourite movies saved, go and add what you like most</string>
+    <string name="activity_details_trailers">Trailers :</string>
 
 </resources>

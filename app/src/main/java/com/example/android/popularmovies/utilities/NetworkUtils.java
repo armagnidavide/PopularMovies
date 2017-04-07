@@ -15,7 +15,7 @@ import java.util.Scanner;
 
 public class NetworkUtils {
     /**
-     * value for querying themoviedb API
+     * strings for querying themoviedb API
      */
     private static final String POPULAR_SEARCH = "popular";
     private static final String TOP_RATED_SEARCH = "top_rated";
